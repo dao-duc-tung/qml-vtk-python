@@ -1,18 +1,23 @@
-from PyQt5.QtCore import QObject, QApp, QUrl, qDebug, qCritical
+from PyQt5.QtCore import QObject, QApp, QUrl, qDebug, qCritical, pyqtSignal
 from PyQt5.QtQml import QQmlApplicationEngine, qmlRegisterType
 from PyQt5.QtWidgets import QApplication
 
 from .QVTKFramebufferObjectItem import QVTKFramebufferObjectItem
+from .CommandModelTranslate import TranslateParams_t
 from .ProcessingEngine import ProcessingEngine
 
 class CanvasHandler(QObject):
+    showFileDialogChanged = pyqtSignal()
+	isModelSelectedChanged = pyqtSignal()
+	selectedModelPositionXChanged = pyqtSignal()
+	selectedModelPositionYChanged = pyqtSignal()
+
     def __init__(self, sys_argv):
         self.__m_previousWorldX:float = 0.0
         self.__m_previousWorldY:float = 0.0
         self.__m_draggingMouse:bool = False
         self.__m_showFileDialog:bool = False
-        # Set style
-        # https://stackoverflow.com/questions/43093797/pyqt5-quickcontrols-material-style
+        #* Set style: https://stackoverflow.com/questions/43093797/pyqt5-quickcontrols-material-style
         sys_argv += ['--style', 'material']
         app = QApplication(sys_argv)
         engine = QQmlApplicationEngine()
@@ -40,11 +45,10 @@ class CanvasHandler(QObject):
             qDebug('CanvasHandler::CanvasHandler: setting vtkFboItem to CanvasHandler')
             self.__m_vtkFboItem.setProcessingEngine(self.__m_processingEngine)
 
-            # TODO: Rewrite this
-            # connect(m_vtkFboItem, &QVTKFramebufferObjectItem::rendererInitialized, this, &CanvasHandler::startApplication);
-            # connect(m_vtkFboItem, &QVTKFramebufferObjectItem::isModelSelectedChanged, this, &CanvasHandler::isModelSelectedChanged);
-            # connect(m_vtkFboItem, &QVTKFramebufferObjectItem::selectedModelPositionXChanged, this, &CanvasHandler::selectedModelPositionXChanged);
-            # connect(m_vtkFboItem, &QVTKFramebufferObjectItem::selectedModelPositionYChanged, this, &CanvasHandler::selectedModelPositionYChanged);
+            self.__m_vtkFboItem.rendererInitialized.connect(self.startApplication)
+            self.__m_vtkFboItem.isModelSelectedChanged.connect(self.isModelSelectedChanged)
+            self.__m_vtkFboItem.selectedModelPositionXChanged.connect(self.selectedModelPositionXChanged)
+            self.__m_vtkFboItem.selectedModelPositionYChanged.connect(self.selectedModelPositionYChanged)
         else:
 		    qCritical('CanvasHandler::CanvasHandler: Unable to get vtkFboItem instance')
             return
@@ -54,8 +58,7 @@ class CanvasHandler(QObject):
 
     def startApplication(self):
         qDebug('CanvasHandler::startApplication()')
-        # TODO:
-	    # disconnect(m_vtkFboItem, &QVTKFramebufferObjectItem::rendererInitialized, this, &CanvasHandler::startApplication);
+        self.__m_vtkFboItem.rendererInitialized.disconnect(self.startApplication)
 
     def openModel(self, path:QUrl):
         qDebug(f'CanvasHandler::openModel(): {path}')
@@ -84,13 +87,11 @@ class CanvasHandler(QObject):
             self.__m_draggingMouse = True
             self.__m_previousWorldX = self.__m_vtkFboItem.getSelectedModelPositionX()
             self.__m_previousWorldY = self.__m_vtkFboItem.getSelectedModelPositionY()
-        # TODO
-        # CommandModelTranslate::TranslateParams_t translateParams;
 
-        # translateParams.screenX = screenX;
-        # translateParams.screenY = screenY;
-
-        # m_vtkFboItem->translateModel(translateParams, true);
+        translateParams = TranslateParams_t()
+        translateParams.screenX = screenX
+        translateParams.screenY = screenY
+        self.__m_vtkFboItem.translateModel(translateParams, True)
 
     def mouseReleaseEvent(self, button:int, screenX:int, screenY:int)
         qDebug('CanvasHandler::mouseReleaseEvent()')
@@ -99,19 +100,16 @@ class CanvasHandler(QObject):
 
         if self.__m_draggingMouse
             self.__m_draggingMouse = False
-            # TODO
-            # CommandModelTranslate::TranslateParams_t translateParams;
-
-            # translateParams.screenX = screenX;
-            # translateParams.screenY = screenY;
-            # translateParams.previousPositionX = m_previousWorldX;
-            # translateParams.previousPositionY = m_previousWorldY;
-
-            # m_vtkFboItem->translateModel(translateParams, false);
+            translateParams = TranslateParams_t()
+            translateParams.screenX = screenX
+            translateParams.screenY = screenY
+            translateParams.previousPositionX = m_previousWorldX
+            translateParams.previousPositionY = m_previousWorldY
+            self.__m_vtkFboItem.translateModel(translateParams, False)
 
 
     def getIsModelSelected(self) -> bool:
-        # QVTKFramebufferObjectItem might not be initialized when QML loads
+        #* QVTKFramebufferObjectItem might not be initialized when QML loads
         if not self.__m_vtkFboItem
             return 0
         return self.__m_vtkFboItem.isModelSelected()

@@ -81,5 +81,5 @@ class ProcessingEngine():
         for model in self.__m_models:
             if model.getModelActor() == modelActor
                 return model
-        # TODO: Raise exception instead
+        raise Exception('Cannot get model from actor')
         return None

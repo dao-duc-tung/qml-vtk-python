@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QObject, QApp, QUrl, qDebug, qCritical, QEvent, QPointF, Qt
+from PyQt5.QtCore import QObject, QApp, QUrl, qDebug, qCritical, QEvent, QPointF, Qt, pyqtSignal
 from PyQt5.QtGui import QColor, QMouseEvent, QWheelEvent
 from PyQt5.QtQuick import QQuickFramebufferObject
 
@@ -10,6 +10,14 @@ import queue
 import threading
 
 class QVTKFramebufferObjectItem(QQuickFramebufferObject):
+    rendererInitialized = pyqtSignal()
+    isModelSelectedChanged = pyqtSignal()
+	selectedModelPositionXChanged = pyqtSignal()
+	selectedModelPositionYChanged = pyqtSignal()
+
+	addModelFromFileDone = pyqtSignal()
+	addModelFromFileError = pyqtSignal(str)
+
     def __init__(self):
         self.__m_vtkFboRenderer:QVTKFramebufferObjectRenderer = None
         self.__m_processingEngine:ProcessingEngine = ProcessingEngine()
@@ -40,10 +48,9 @@ class QVTKFramebufferObjectItem(QQuickFramebufferObject):
 
         self.__m_vtkFboRenderer = renderer
 
-        # TODO
-        # connect(self.__m_vtkFboRenderer, &QVTKFramebufferObjectRenderer::isModelSelectedChanged, this, &QVTKFramebufferObjectItem::isModelSelectedChanged)
-        # connect(self.__m_vtkFboRenderer, &QVTKFramebufferObjectRenderer::selectedModelPositionXChanged, this, &QVTKFramebufferObjectItem::selectedModelPositionXChanged)
-        # connect(self.__m_vtkFboRenderer, &QVTKFramebufferObjectRenderer::selectedModelPositionYChanged, this, &QVTKFramebufferObjectItem::selectedModelPositionYChanged)
+        self.__m_vtkFboRenderer.isModelSelectedChanged.connect(self.isModelSelectedChanged)
+        self.__m_vtkFboRenderer.selectedModelPositionXChanged.connect(self.selectedModelPositionXChanged)
+        self.__m_vtkFboRenderer.selectedModelPositionYChanged.connect(self.selectedModelPositionYChanged)
 
         self.__m_vtkFboRenderer.setProcessingEngine(self.__m_processingEngine)
 
@@ -79,9 +86,8 @@ class QVTKFramebufferObjectItem(QQuickFramebufferObject):
 
         command = CommandModelAdd(self.__m_vtkFboRenderer, self.__m_processingEngine, modelPath)
 
-        # TODO
-        # connect(command, &CommandModelAdd::ready, this, &QVTKFramebufferObjectItem::update)
-        # connect(command, &CommandModelAdd::done, this, &QVTKFramebufferObjectItem::addModelFromFileDone)
+        command.ready.connect(self.update)
+        command.done.connect(self.addModelFromFileDone)
 
         command.start()
         self.__addCommand(command)

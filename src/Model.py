@@ -1,9 +1,12 @@
-from PyQt5.QtCore import QObject, QApp, QUrl, qDebug, qCritical, QFileInfo
+from PyQt5.QtCore import QObject, QApp, QUrl, qDebug, qCritical, QFileInfo, pyqtSignal
 from PyQt5.QtGui import QColor
 import threading
 import vtk
 
 class Model(QObject):
+    positionXChanged = pyqtSignal(float)
+	positionYChanged = pyqtSignal(float)
+
     __m_defaultModelColor:QColor = QColor("#0277bd")
     __m_selectedModelColor:QColor = QColor("#03a9f4")
 
@@ -63,14 +66,12 @@ class Model(QObject):
     def __setPositionX(self, positionX:float):
         if self.__m_positionX != positionX:
             self.__m_positionX = positionX
-            # TODO
-            # emit positionXChanged(self.__m_positionX)
+            self.positionXChanged.emit(self.__m_positionX)
 
     def __setPositionY(self,const double positionY):
         if self.__m_positionY != positionY:
             self.__m_positionY = positionY
-            # TODO
-            # emit positionYChanged(self.__m_positionY)
+            self.positionYChanged.emit(self.__m_positionY)
 
 
     def translateToPosition(self,const double x, const double y):
@@ -87,9 +88,8 @@ class Model(QObject):
         self.__m_modelFilterTranslate.SetTransform(translation)
         self.__m_modelFilterTranslate.Update()
 
-        # TODO
-        # emit positionXChanged(self.__m_positionX)
-        # emit positionYChanged(self.__m_positionY)
+        self.positionXChanged.emit(self.__m_positionX)
+        self.positionYChanged.emit(self.__m_positionY)
 
 
     def setSelected(self, selected:bool):

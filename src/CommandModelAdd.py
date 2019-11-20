@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QObject, QApp, QUrl, qDebug, qCritical, QFileInfo, QThread
+from PyQt5.QtCore import QObject, QApp, QUrl, qDebug, qCritical, QFileInfo, QThread, pyqtSignal
 
 from .ProcessingEngine import ProcessingEngine
 from .CommandModel import CommandModel
@@ -6,6 +6,9 @@ from .Model import Model
 from .QVTKFramebufferObjectRenderer import QVTKFramebufferObjectRenderer
 
 class CommandModelAdd(QThread, CommandModel):
+    ready = pyqtSignal()
+	done = pyqtSignal()
+
     def __init__(self, vtkFboRenderer:QVTKFramebufferObjectRenderer, processingEngine:ProcessingEngine, modelPath:QUrl):
         self.__m_model:Model = None
         self.__m_positionX:float = 0.0
@@ -23,9 +26,7 @@ class CommandModelAdd(QThread, CommandModel):
         self.__m_processingEngine.placeModel(self.__m_model)
 
         self.__m_ready = True
-
-        # TODO
-        # emit ready()
+        self.ready.emit()
 
 
     def isReady() -> bool:
@@ -36,5 +37,4 @@ class CommandModelAdd(QThread, CommandModel):
 
         self._m_vtkFboRenderer.addModelActor(self.__m_model)
 
-        # TODO
-        # emit done()
+        self.done.emit()

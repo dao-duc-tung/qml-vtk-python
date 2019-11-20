@@ -1,5 +1,6 @@
-from PyQt5.QtCore import QObject, QApp, QUrl, qDebug, QCritical, QFileInfo, QEvent, Qt, QSize
-from PyQt5.QtGui import QSurfaceFormat, QColor, QMouseEvent, QWheelEvent
+from PyQt5.Qt import QVTKOpenGLNativeWidget
+from PyQt5.QtCore import QObject, QApp, QUrl, qDebug, QCritical, QFileInfo, QEvent, Qt, QSize, pyqtSignal
+from PyQt5.QtGui import QSurfaceFormat, QColor, QMouseEvent, QWheelEvent, QOpenGLFunctions, QOpenGLFramebufferObject, QOpenGLFramebufferObjectFormat
 from PyQt5.QtQuick import QQuickFramebufferObject
 
 from .Model import Model
@@ -9,8 +10,11 @@ from .QVTKFramebufferObjectItem import QVTKFramebufferObjectItem
 import numpy as np
 import vtk
 
-#* TODO: QOpenGLFunctions
-class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
+class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, QOpenGLFunctions):
+    isModelSelectedChanged = pyqtSignal()
+	selectedModelPositionXChanged = pyqtSignal()
+	selectedModelPositionYChanged = pyqtSignal()
+
     def __init__(self):
         self.__m_processingEngine:ProcessingEngine = None
         self.__m_vtkFboItem:QVTKFramebufferObjectItem = None
@@ -52,8 +56,7 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
         self.__m_modelsGouraudInterpolation:bool = False
 
         #* Renderer
-        #* TODO
-        #* QSurfaceFormat.setDefaultFormat(QVTKOpenGLNativeWidget::defaultFormat())
+        QSurfaceFormat.setDefaultFormat(QVTKOpenGLNativeWidget.defaultFormat())
         self.__m_vtkRenderWindow:vtkGenericOpenGLRenderWindow = vtk.vtkGenericOpenGLRenderWindow()
         self.__m_renderer:vtkRenderer = vtk.vtkRenderer()
         self.__m_vtkRenderWindow.AddRenderer(self.__m_renderer)
@@ -88,8 +91,7 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
 
         if not self.__m_vtkFboItem.isInitialized():
             self.__m_vtkFboItem.setVtkFboRenderer(self)
-
-            # TODO: emit self.__m_vtkFboItem.rendererInitialized()
+            self.__m_vtkFboItem.rendererInitialized.emit()
 
         rendererSize = self.__m_vtkRenderWindow.GetSize()
 
@@ -207,32 +209,29 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
     def openGLInitState(self):
         self.__m_vtkRenderWindow.OpenGLInitState()
         self.__m_vtkRenderWindow.MakeCurrent()
-        # TODO
-        # QOpenGLFunctions::initializeOpenGLFunctions()
-        # QOpenGLFunctions::glUseProgram(0)
+        QOpenGLFunctions.initializeOpenGLFunctions()
+        QOpenGLFunctions.glUseProgram(0)
 
-    # TODO
-    def createFramebufferObject(self, size:QSize): # -> QOpenGLFramebufferObject:
-        pass
-    #     macSize = QSize(size.width() / 2, size.height() / 2)
+    def createFramebufferObject(self, size:QSize) -> QOpenGLFramebufferObject:
+        macSize = QSize(size.width() / 2, size.height() / 2)
 
-    #     format = QOpenGLFramebufferObjectFormat()
-    #     format.setAttachment(QOpenGLFramebufferObject::Depth)
+        format = QOpenGLFramebufferObjectFormat()
+        format.setAttachment(QOpenGLFramebufferObject.Depth)
 
-    # #ifdef Q_OS_MAC
-    #     std::unique_ptr<QOpenGLFramebufferObject> framebufferObject(new QOpenGLFramebufferObject(macSize, format))
-    # #else
-    #     std::unique_ptr<QOpenGLFramebufferObject> framebufferObject(new QOpenGLFramebufferObject(size, format))
-    # #endif
-        # self.__m_vtkRenderWindow.SetBackLeftBuffer(GL_COLOR_ATTACHMENT0)
-        # self.__m_vtkRenderWindow.SetFrontLeftBuffer(GL_COLOR_ATTACHMENT0)
-        # self.__m_vtkRenderWindow.SetBackBuffer(GL_COLOR_ATTACHMENT0)
-        # self.__m_vtkRenderWindow.SetFrontBuffer(GL_COLOR_ATTACHMENT0)
-        # self.__m_vtkRenderWindow.SetSize(framebufferObject.size().width(), framebufferObject.size().height())
-        # self.__m_vtkRenderWindow.SetOffScreenRendering(True)
-        # self.__m_vtkRenderWindow.Modified()
+    #ifdef Q_OS_MAC
+        # std::unique_ptr<QOpenGLFramebufferObject> framebufferObject(new QOpenGLFramebufferObject(macSize, format))
+    #else
+        framebufferObject = QOpenGLFramebufferObject(size, format)
+    #endif
+        self.__m_vtkRenderWindow.SetBackLeftBuffer(GL_COLOR_ATTACHMENT0)
+        self.__m_vtkRenderWindow.SetFrontLeftBuffer(GL_COLOR_ATTACHMENT0)
+        self.__m_vtkRenderWindow.SetBackBuffer(GL_COLOR_ATTACHMENT0)
+        self.__m_vtkRenderWindow.SetFrontBuffer(GL_COLOR_ATTACHMENT0)
+        self.__m_vtkRenderWindow.SetSize(framebufferObject.size().width(), framebufferObject.size().height())
+        self.__m_vtkRenderWindow.SetOffScreenRendering(True)
+        self.__m_vtkRenderWindow.Modified()
 
-        # return framebufferObject.release()
+        return framebufferObject.release()
 
     def initScene(self):
         qDebug('QVTKFramebufferObjectRenderer::initScene()')
@@ -384,9 +383,8 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
             self.__m_selectedModel.setSelected(True)
 
             #* Connect signals
-            # TODO
-            # connect(self.__m_selectedModel.get(), &Model.positionXChanged, self, &QVTKFramebufferObjectRenderer::setSelectedModelPositionX)
-            # connect(self.__m_selectedModel.get(), &Model.positionYChanged, self, &QVTKFramebufferObjectRenderer::setSelectedModelPositionY)
+            self.__m_selectedModel.get().positionXChanged.connect(self.setSelectedModelPositionX)
+            self.__m_selectedModel.get().positionYChanged.connect(self.setSelectedModelPositionY)
 
             self.setSelectedModelPositionX(self.__m_selectedModel.getPositionX())
             self.setSelectedModelPositionY(self.__m_selectedModel.getPositionY())
@@ -403,9 +401,8 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
     def __clearSelectedModel(self):
         self.__m_selectedModel.setSelected(False)
 
-        # TODO:
-        # disconnect(self.__m_selectedModel.get(), &Model.positionXChanged, self, &QVTKFramebufferObjectRenderer::setSelectedModelPositionX)
-        # disconnect(self.__m_selectedModel.get(), &Model.positionYChanged, self, &QVTKFramebufferObjectRenderer::setSelectedModelPositionY)
+        self.__m_selectedModel.get().positionXChanged.disconnect(self.setSelectedModelPositionX)
+        self.__m_selectedModel.get().positionYChanged.disconnect(self.setSelectedModelPositionY)
 
         self.__m_selectedModel = None
         self.__m_selectedActor = None
@@ -414,7 +411,7 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
         if self.__m_isModelSelected != isModelSelected:
             qDebug(f'QVTKFramebufferObjectRenderer::__setIsModelSelected(): {isModelSelected}')
             self.__m_isModelSelected = isModelSelected
-            # TODO: emit isModelSelectedChanged()
+            self.isModelSelectedChanged.emit()
 
     def isModelSelected(self) -> bool:
         return self.__m_isModelSelected
@@ -429,12 +426,12 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
     def setSelectedModelPositionX(self, positionX:float):
         if self.__m_selectedModelPositionX != positionX:
             self.__m_selectedModelPositionX = positionX
-            # TODO: emit selectedModelPositionXChanged()
+            self.selectedModelPositionXChanged.emit()
 
     def setSelectedModelPositionY(self, positionY:float):
         if self.__m_selectedModelPositionY != positionY:
             self.__m_selectedModelPositionY = positionY
-            # TODO: emit selectedModelPositionYChanged()
+            self.selectedModelPositionYChanged.emit()
 
     def getSelectedModelPositionX(self) -> float:
         return self.__m_selectedModelPositionX
