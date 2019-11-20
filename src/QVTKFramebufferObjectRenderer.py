@@ -11,6 +11,21 @@ import vtk
 
 # from vtk.qt.QVTKRenderWindowInteractor import QV
 
+#* https://github.com/Kitware/VTK/blob/master/GUISupport/Qt/QVTKOpenGLNativeWidget.cxx
+fmt = QSurfaceFormat()
+fmt.setRenderableType(QSurfaceFormat.OpenGL)
+fmt.setVersion(3, 2)
+fmt.setProfile(QSurfaceFormat.CoreProfile)
+fmt.setSwapBehavior(QSurfaceFormat.DoubleBuffer)
+fmt.setRedBufferSize(8)
+fmt.setGreenBufferSize(8)
+fmt.setBlueBufferSize(8)
+fmt.setDepthBufferSize(8)
+fmt.setAlphaBufferSize(8)
+fmt.setStencilBufferSize(0)
+fmt.setStereo(False)
+fmt.setSamples(0) # we never need multisampling in the context since the FBO can support multisamples independently
+
 class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, QOpenGLFunctions):
     isModelSelectedChanged = Signal()
     selectedModelPositionXChanged = Signal()
@@ -61,9 +76,8 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, Q
         #* Renderer
         #* https://vtk.org/doc/nightly/html/classQVTKOpenGLNativeWidget.html#details
         # QSurfaceFormat.setDefaultFormat(QVTKOpenGLNativeWidget.defaultFormat()) # from vtk 8.2.0
+        QSurfaceFormat.setDefaultFormat(fmt)
         self.__m_vtkRenderWindow:vtkGenericOpenGLRenderWindow = vtk.vtkGenericOpenGLRenderWindow()
-        # QSurfaceFormat.setDefaultFormat(QVTKOpenGLWidget.defaultFormat()) # from 8.0.0
-        # self.__m_vtkRenderWindow:vtkGenericOpenGLRenderWindow = vtk.vtkOpenGLRenderWindow()
         self.__m_renderer:vtkRenderer = vtk.vtkRenderer()
         self.__m_vtkRenderWindow.AddRenderer(self.__m_renderer)
 

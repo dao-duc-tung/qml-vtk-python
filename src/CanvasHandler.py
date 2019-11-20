@@ -7,10 +7,10 @@ from CommandModelTranslate import TranslateParams_t
 from ProcessingEngine import ProcessingEngine
 
 class CanvasHandler(QObject):
-    showFileDialogChanged = Signal()
-    isModelSelectedChanged = Signal()
-    selectedModelPositionXChanged = Signal()
-    selectedModelPositionYChanged = Signal()
+    showFileDialogChanged = Signal(bool)
+    isModelSelectedChanged = Signal(bool)
+    selectedModelPositionXChanged = Signal(float)
+    selectedModelPositionYChanged = Signal(float)
 
     def __init__(self, sys_argv):
         super().__init__()
@@ -29,7 +29,7 @@ class CanvasHandler(QObject):
         app.setApplicationName('QtVTK-Py')
 
         #* Register QML Types
-        qmlRegisterType(QVTKFramebufferObjectItem, 'QtVTK', 1, 0, 'VtkFboItem')
+        # qmlRegisterType(QVTKFramebufferObjectItem, 'QtVTK', 1, 0, 'VtkFboItem')
 
         #* Create classes instances
         self.__m_processingEngine = ProcessingEngine()
@@ -42,28 +42,38 @@ class CanvasHandler(QObject):
         engine.load(QUrl.fromLocalFile('resources\\main.qml'))
 
         #* Get reference to the QVTKFramebufferObjectItem in QML
-        rootObject = engine.rootObjects()[0] # returns QObject
-        self.__m_vtkFboItem = rootObject.findChild(QVTKFramebufferObjectItem, 'vtkFboItem')
+        # rootObject = engine.rootObjects()[0] # returns QObject
+        # self.__m_vtkFboItem = rootObject.findChild(QVTKFramebufferObjectItem, 'vtkFboItem')
 
-        #* Give the vtkFboItem reference to the CanvasHandler
-        if (self.__m_vtkFboItem):
-            qDebug('CanvasHandler::CanvasHandler: setting vtkFboItem to CanvasHandler')
-            self.__m_vtkFboItem.setProcessingEngine(self.__m_processingEngine)
+        # #* Give the vtkFboItem reference to the CanvasHandler
+        # if (self.__m_vtkFboItem):
+        #     qDebug('CanvasHandler::CanvasHandler: setting vtkFboItem to CanvasHandler')
+        #     self.__m_vtkFboItem.setProcessingEngine(self.__m_processingEngine)
 
-            self.__m_vtkFboItem.rendererInitialized.connect(self.startApplication)
-            self.__m_vtkFboItem.isModelSelectedChanged.connect(self.isModelSelectedChanged)
-            self.__m_vtkFboItem.selectedModelPositionXChanged.connect(self.selectedModelPositionXChanged)
-            self.__m_vtkFboItem.selectedModelPositionYChanged.connect(self.selectedModelPositionYChanged)
-        else:
-            qCritical('CanvasHandler::CanvasHandler: Unable to get vtkFboItem instance')
-            return
+        #     self.__m_vtkFboItem.rendererInitialized.connect(self.startApplication)
+        #     self.__m_vtkFboItem.isModelSelectedChanged.connect(self.isModelSelectedChanged)
+        #     self.__m_vtkFboItem.selectedModelPositionXChanged.connect(self.selectedModelPositionXChanged)
+        #     self.__m_vtkFboItem.selectedModelPositionYChanged.connect(self.selectedModelPositionYChanged)
+        # else:
+        #     qCritical('CanvasHandler::CanvasHandler: Unable to get vtkFboItem instance')
+        #     return
 
         rc = app.exec_()
         qDebug(f'CanvasHandler::CanvasHandler: Execution finished with return code: {rc}')
 
-    @Property(bool, notify=showFileDialogChanged)
-    def showFileDialog(self):
+    def get_showFileDialog(self):
         return self.__m_showFileDialog
+
+    def set_showFileDialog(self, val:bool):
+        if self.__m_showFileDialog == val:
+            return
+        self.__m_showFileDialog = val
+        self.showFileDialogChanged.emit(val)
+
+    #! setter doesn't work
+    #! PySide2 has limitations with the Property decorator and its setter since it is not recognized by QML, instead it uses the extensive declaration
+    #! https://stackoverflow.com/questions/57742024/custom-object-referencing-in-qml-python
+    showFileDialog = Property(bool, fget=get_showFileDialog, fset=set_showFileDialog, notify=showFileDialogChanged)
 
     @Property(bool, notify=isModelSelectedChanged)
     def isModelSelected(self):
