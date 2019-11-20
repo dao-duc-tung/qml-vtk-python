@@ -1,4 +1,4 @@
-from PyQt5.QtCore import QObject, QApp, QUrl, qDebug, qCritical, QEvent, QPointF, Q_FLAGS, Qt
+from PyQt5.QtCore import QObject, QApp, QUrl, qDebug, qCritical, QEvent, QPointF, Qt
 from PyQt5.QtGui import QColor, QMouseEvent, QWheelEvent
 from PyQt5.QtQuick import QQuickFramebufferObject
 

@@ -14,27 +14,27 @@ class ProcessingEngine():
         inputData = None # vtkPolyData
 
         if modelFilePathExtension == 'obj':
-            # Read OBJ file
+            #* Read OBJ file
             objReader.SetFileName(modelFilePath.toString().toStdString().c_str())
             objReader.Update()
             inputData = objReader.GetOutput()
         else:
-            # Read STL file
+            #* Read STL file
             stlReader.SetFileName(modelFilePath.toString().toStdString().c_str())
             stlReader.Update()
             inputData = stlReader.GetOutput()
 
-        # Preprocess the polydata
+        #* Preprocess the polydata
         preprocessedPolydata = preprocessPolydata(inputData) # vtkPolyData
 
-        # Create Model instance and insert it into the vector
+        #* Create Model instance and insert it into the vector
         model = preprocessedPolydata
         self.__m_models.append(model)
 
         return self.__m_models[-1]
 
     def preprocessPolydata(self, inputData:vtk.vtkPolyData) -> vtk.vtkPolyData:
-        # Center the polygon
+        #* Center the polygon
         center = [0.0, 0.0, 0.0]
         inputData.GetCenter(center)
 
@@ -46,7 +46,7 @@ class ProcessingEngine():
         transformFilter.SetTransform(translation)
         transformFilter.Update()
 
-        # Normals - For the Gouraud interpolation to work
+        #* Normals - For the Gouraud interpolation to work
         normals = vtkPolyDataNormals()
         normals.SetInputData(transformFilter.GetOutput())
         normals.ComputePointNormalsOn()
@@ -81,5 +81,5 @@ class ProcessingEngine():
         for model in self.__m_models:
             if model.getModelActor() == modelActor
                 return model
-        # Raise exception instead
+        # TODO: Raise exception instead
         return None

@@ -16,7 +16,7 @@ class Model(QObject):
         self.__m_mouseDeltaY:float = 0.0
 
         self.__m_modelData:vtk.vtkPolyData = modelData
-        # Place model with lower Z bound at zero
+        #* Place model with lower Z bound at zero
         self.__m_positionZ:float = self.__m_modelData.GetBounds()[4]
 
         translation = vtk.vtkTransform()
@@ -27,12 +27,12 @@ class Model(QObject):
         self.__m_modelFilterTranslate.SetTransform(translation)
         self.__m_modelFilterTranslate.Update()
 
-        # Model Mapper
+        #* Model Mapper
         self.__m_modelMapper:vtk.vtkPolyDataMapper = vtkPolyDataMapper()
         self.__m_modelMapper.SetInputConnection(self.__m_modelFilterTranslate.GetOutputPort())
         self.__m_modelMapper.ScalarVisibilityOff()
 
-        # Model Actor
+        #* Model Actor
         self.__m_modelActor:vtk.vtkActor = vtk.vtkActor()
         self.__m_modelActor.SetMapper(self.__m_modelMapper)
         self.__m_modelActor.GetProperty().SetInterpolationToFlat()
@@ -98,6 +98,7 @@ class Model(QObject):
 
             self.updateModelColor()
 
+    @staticmethod
     def setSelectedModelColor(self, selectedModelColor:QColor):
         self.__m_selectedModelColor = selectedModelColor
 

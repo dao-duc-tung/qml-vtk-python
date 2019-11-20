@@ -33,7 +33,7 @@ class CanvasHandler(QObject):
 
         #* Get reference to the QVTKFramebufferObjectItem in QML
         rootObject = engine.rootObjects()[0] # this returns QObject
-        self.__m_vtkFboItem = rootObject.findChild('vtkFboItem')
+        self.__m_vtkFboItem:QVTKFramebufferObjectItem = rootObject.findChild('vtkFboItem')
 
         #* Give the vtkFboItem reference to the CanvasHandler
         if (self.__m_vtkFboItem):
@@ -117,13 +117,13 @@ class CanvasHandler(QObject):
         return self.__m_vtkFboItem.isModelSelected()
 
     def getSelectedModelPositionX(self) -> float:
-	# QVTKFramebufferObjectItem might not be initialized when QML loads
+	    #* QVTKFramebufferObjectItem might not be initialized when QML loads
         if not self.__m_vtkFboItem
             return 0
         return self.__m_vtkFboItem.getSelectedModelPositionX()
 
     def getSelectedModelPositionY(self) -> float:
-        # QVTKFramebufferObjectItem might not be initialized when QML loads
+        #* QVTKFramebufferObjectItem might not be initialized when QML loads
         if not self.__m_vtkFboItem
             return 0
         return self.__m_vtkFboItem.getSelectedModelPositionY()
