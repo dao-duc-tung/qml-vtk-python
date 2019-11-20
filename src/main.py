@@ -1,4 +1,5 @@
 # from PySide2.QtWidgets import QApplication, QLabel
+# from PyQt5.QtWidgets import QApplication, QLabel
 from CanvasHandler import CanvasHandler
 import os, sys
 

@@ -132,7 +132,7 @@ class CanvasHandler(QObject):
     def getIsModelSelected(self) -> bool:
         #* QVTKFramebufferObjectItem might not be initialized when QML loads
         if not self.__m_vtkFboItem:
-            return 0
+            return False
         return self.__m_vtkFboItem.isModelSelected()
 
     def getSelectedModelPositionX(self) -> float:

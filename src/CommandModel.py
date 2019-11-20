@@ -4,7 +4,6 @@ from QVTKFramebufferObjectRenderer import QVTKFramebufferObjectRenderer
 
 class CommandModel():
     @property
-    @abstractmethod
     def _m_vtkFboRenderer(self) -> QVTKFramebufferObjectRenderer:
         return QVTKFramebufferObjectRenderer()
 
