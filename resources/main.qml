@@ -3,6 +3,7 @@ import QtQuick.Controls 2.2
 import QtQuick.Dialogs 1.2
 import QtQuick.Window 2.3
 import QtQuick.Controls.Material 2.2
+import QtVTK 1.0
 
 ApplicationWindow {
     id: root
@@ -18,7 +19,26 @@ ApplicationWindow {
         id: screenCanvasUI
         anchors.fill: parent
 
-        // VtkFboItem
+        VtkFboItem {
+            id: vtkFboItem
+            objectName: "vtkFboItem"
+            anchors.fill: parent
+
+            MouseArea {
+                acceptedButtons: Qt.LeftButton
+                anchors.fill: parent
+
+                onPositionChanged: {
+                    canvasHandler.mouseMoveEvent(pressedButtons, mouseX, mouseY);
+                }
+                onPressed: {
+                    canvasHandler.mousePressEvent(pressedButtons, mouseX, mouseY);
+                }
+                onReleased: {
+                    canvasHandler.mouseReleaseEvent(pressedButtons, mouseX, mouseY);
+                }
+            }
+        }
 
         Button {
             id: openFileButton
