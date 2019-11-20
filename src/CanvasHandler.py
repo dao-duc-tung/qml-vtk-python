@@ -1,5 +1,5 @@
 from PySide2.QtCore import QObject, QUrl, qDebug, qCritical, Signal, Property
-from PySide2.QtQml import QQmlApplicationEngine, qmlRegisterType
+from PySide2.QtQml import QQmlApplicationEngine, qmlRegisterType, QQmlEngine
 from PySide2.QtWidgets import QApplication
 
 from QVTKFramebufferObjectItem import QVTKFramebufferObjectItem
@@ -22,7 +22,10 @@ class CanvasHandler(QObject):
         #* Set style: https://stackoverflow.com/questions/43093797/PySide2-quickcontrols-material-style
         sys_argv += ['--style', 'material']
         app = QApplication(sys_argv)
+
         engine = QQmlApplicationEngine()
+        engine.setImportPathList(['C:\\Users\\tungdao\\.conda\\envs\\antc\\Lib\\site-packages\\PySide2\\qml'])
+        # print(engine.importPathList())
         app.setApplicationName('QtVTK-Py')
 
         #* Register QML Types

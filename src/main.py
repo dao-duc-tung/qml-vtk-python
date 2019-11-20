@@ -1,3 +1,4 @@
+# from PySide2.QtWidgets import QApplication, QLabel
 from CanvasHandler import CanvasHandler
 import os, sys
 
@@ -11,14 +12,19 @@ def set_vtk_log():
 
 # class QtVtkPy(QApplication):
 #     def __init__(self, sys_argv):
-#         super().__init__(sys_argv)
-#         sys_argv += ['--style', 'material']
-#         self.__app = CanvasHandler(sys.argv)
+#         # super(QtVtkPy, self).__init__(sys_argv)
+#         # sys_argv += ['--style', 'material']
+#         self.__app = CanvasHandler(sys_argv)
+        # print('a')
 
 def main():
     CanvasHandler(sys.argv)
-    # app = QApplication(sys.argv)
+    # app = QtVtkPy(sys.argv)
     # sys.exit(app.exec_())
+    # app = QApplication([])
+    # window = QLabel('Window from label')
+    # window.show()
+    # app.exec_()
 
 if __name__ == '__main__':
     set_vtk_log()
