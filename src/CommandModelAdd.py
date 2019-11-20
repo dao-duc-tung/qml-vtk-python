@@ -1,13 +1,13 @@
-from PyQt5.QtCore import QObject, QApp, QUrl, qDebug, qCritical, QFileInfo, QThread, pyqtSignal
+from PySide2.QtCore import QObject, QUrl, qDebug, qCritical, QFileInfo, QThread, Signal
 
-from .ProcessingEngine import ProcessingEngine
-from .CommandModel import CommandModel
-from .Model import Model
-from .QVTKFramebufferObjectRenderer import QVTKFramebufferObjectRenderer
+from ProcessingEngine import ProcessingEngine
+from CommandModel import CommandModel
+from Model import Model
+from QVTKFramebufferObjectRenderer import QVTKFramebufferObjectRenderer
 
 class CommandModelAdd(QThread, CommandModel):
-    ready = pyqtSignal()
-	done = pyqtSignal()
+    ready = Signal()
+    done = Signal()
 
     def __init__(self, vtkFboRenderer:QVTKFramebufferObjectRenderer, processingEngine:ProcessingEngine, modelPath:QUrl):
         self.__m_model:Model = None
@@ -36,5 +36,4 @@ class CommandModelAdd(QThread, CommandModel):
         qDebug('CommandModelAdd::execute()')
 
         self._m_vtkFboRenderer.addModelActor(self.__m_model)
-
         self.done.emit()

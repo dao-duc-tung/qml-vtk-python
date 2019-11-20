@@ -1,9 +1,12 @@
-from abc import abstractmethod
-from .QVTKFramebufferObjectRenderer import QVTKFramebufferObjectRenderer
+from abc import ABC, ABCMeta, abstractmethod
+
+from QVTKFramebufferObjectRenderer import QVTKFramebufferObjectRenderer
 
 class CommandModel():
-    def __init__(self):
-        self._m_vtkFboRenderer:QVTKFramebufferObjectRenderer = QVTKFramebufferObjectRenderer()
+    @property
+    @abstractmethod
+    def _m_vtkFboRenderer(self) -> QVTKFramebufferObjectRenderer:
+        return QVTKFramebufferObjectRenderer()
 
     @abstractmethod
     def isReady(self) -> bool:

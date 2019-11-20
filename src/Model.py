@@ -1,14 +1,18 @@
-from PyQt5.QtCore import QObject, QApp, QUrl, qDebug, qCritical, QFileInfo, pyqtSignal
-from PyQt5.QtGui import QColor
+from PySide2.QtCore import QObject, QUrl, qDebug, qCritical, QFileInfo, Signal
+from PySide2.QtGui import QColor
 import threading
 import vtk
 
-class Model(QObject):
-    positionXChanged = pyqtSignal(float)
-	positionYChanged = pyqtSignal(float)
+m_defaultModelColor:QColor = QColor("#0277bd")
+m_selectedModelColor:QColor = QColor("#03a9f4")
 
-    __m_defaultModelColor:QColor = QColor("#0277bd")
-    __m_selectedModelColor:QColor = QColor("#03a9f4")
+def setSelectedModelColor(selectedModelColor:QColor):
+    global m_selectedModelColor
+    m_selectedModelColor = selectedModelColor
+
+class Model(QObject):
+    positionXChanged = Signal(float)
+    positionYChanged = Signal(float)
 
     def __init__(self, modelData:vtk.vtkPolyData):
         self.__m_propertiesMutex = threading.Lock()
@@ -68,13 +72,13 @@ class Model(QObject):
             self.__m_positionX = positionX
             self.positionXChanged.emit(self.__m_positionX)
 
-    def __setPositionY(self,const double positionY):
+    def __setPositionY(self, positionY:float):
         if self.__m_positionY != positionY:
             self.__m_positionY = positionY
             self.positionYChanged.emit(self.__m_positionY)
 
 
-    def translateToPosition(self,const double x, const double y):
+    def translateToPosition(self, x:float,  y:float):
         if self.__m_positionX == x and self.__m_positionY == y:
             return
 
@@ -98,15 +102,11 @@ class Model(QObject):
 
             self.updateModelColor()
 
-    @staticmethod
-    def setSelectedModelColor(self, selectedModelColor:QColor):
-        self.__m_selectedModelColor = selectedModelColor
-
     def updateModelColor(self):
         if self.__m_selected:
-            self.__setColor(self.__m_selectedModelColor)
-        else
-            self.__setColor(self.__m_defaultModelColor)
+            self.__setColor(m_selectedModelColor)
+        else:
+            self.__setColor(m_defaultModelColor)
 
     def __setColor(self, color:QColor):
         self.__m_modelActor.GetProperty().SetColor(color.redF(), color.greenF(), color.blueF())

@@ -1,22 +1,25 @@
-from PyQt5.Qt import QVTKOpenGLNativeWidget
-from PyQt5.QtCore import QObject, QApp, QUrl, qDebug, QCritical, QFileInfo, QEvent, Qt, QSize, pyqtSignal
-from PyQt5.QtGui import QSurfaceFormat, QColor, QMouseEvent, QWheelEvent, QOpenGLFunctions, QOpenGLFramebufferObject, QOpenGLFramebufferObjectFormat
-from PyQt5.QtQuick import QQuickFramebufferObject
+from PySide2.QtCore import QObject, QUrl, qDebug, qCritical, QFileInfo, QEvent, Qt, QSize, Signal
+from PySide2.QtGui import QSurfaceFormat, QColor, QMouseEvent, QWheelEvent, QOpenGLFramebufferObject, QOpenGLFramebufferObjectFormat, QOpenGLFunctions
+from PySide2.QtQuick import QQuickFramebufferObject
+from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
-from .Model import Model
-from .ProcessingEngine import ProcessingEngine
-from .QVTKFramebufferObjectItem import QVTKFramebufferObjectItem
+from Model import Model, setSelectedModelColor
+from ProcessingEngine import ProcessingEngine
 
 import numpy as np
 import vtk
 
+# from vtk.qt.QVTKRenderWindowInteractor import QV
+
 class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, QOpenGLFunctions):
-    isModelSelectedChanged = pyqtSignal()
-	selectedModelPositionXChanged = pyqtSignal()
-	selectedModelPositionYChanged = pyqtSignal()
+    isModelSelectedChanged = Signal()
+    selectedModelPositionXChanged = Signal()
+    selectedModelPositionYChanged = Signal()
 
     def __init__(self):
+        super().__init__()
         self.__m_processingEngine:ProcessingEngine = None
+        from QVTKFramebufferObjectItem import QVTKFramebufferObjectItem
         self.__m_vtkFboItem:QVTKFramebufferObjectItem = None
 
         self.__m_selectedModel:Model = None
@@ -56,17 +59,20 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, Q
         self.__m_modelsGouraudInterpolation:bool = False
 
         #* Renderer
-        QSurfaceFormat.setDefaultFormat(QVTKOpenGLNativeWidget.defaultFormat())
+        #* https://vtk.org/doc/nightly/html/classQVTKOpenGLNativeWidget.html#details
+        # QSurfaceFormat.setDefaultFormat(QVTKOpenGLNativeWidget.defaultFormat()) # from vtk 8.2.0
         self.__m_vtkRenderWindow:vtkGenericOpenGLRenderWindow = vtk.vtkGenericOpenGLRenderWindow()
+        # QSurfaceFormat.setDefaultFormat(QVTKOpenGLWidget.defaultFormat()) # from 8.0.0
+        # self.__m_vtkRenderWindow:vtkGenericOpenGLRenderWindow = vtk.vtkOpenGLRenderWindow()
         self.__m_renderer:vtkRenderer = vtk.vtkRenderer()
         self.__m_vtkRenderWindow.AddRenderer(self.__m_renderer)
 
         #* Interactor
-        self.__m_vtkRenderWindowInteractor:vtkGenericRenderWindowInteractor = vtk.vtkGenericRenderWindowInteractor()
+        self.__m_vtkRenderWindowInteractor:vtk.vtkGenericRenderWindowInteractor = vtk.vtkGenericRenderWindowInteractor()
         self.__m_vtkRenderWindowInteractor.EnableRenderOff()
         self.__m_vtkRenderWindow.SetInteractor(self.__m_vtkRenderWindowInteractor)
 
-        #*  the OpenGL context for the rendere:
+        #* Initialize the OpenGL context for the renderer
         self.__m_vtkRenderWindow.OpenGLInitContext()
 
         #* Interactor Style
@@ -79,14 +85,16 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, Q
         self.__m_picker:vtkCellPicker = vtk.vtkCellPicker()
         self.__m_picker.SetTolerance(0.0)
 
-        update()
+        self.update()
 
     def setProcessingEngine(self, processingEngine:ProcessingEngine):
         self.__m_processingEngine = processingEngine
 
     def synchronize(self, item:QQuickFramebufferObject):
-        #*  the first synchroniz:
+        qDebug('QVTKFramebufferObjectRenderer::synchronize()')
+        #* the first synchronize
         if not self.__m_vtkFboItem:
+            from QVTKFramebufferObjectItem import QVTKFramebufferObjectItem
             self.__m_vtkFboItem = (QVTKFramebufferObjectItem)(item)
 
         if not self.__m_vtkFboItem.isInitialized():
@@ -119,9 +127,10 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, Q
         self.__m_modelsRepresentationOption = self.__m_vtkFboItem.getModelsRepresentation()
         self.__m_modelsOpacity = self.__m_vtkFboItem.getModelsOpacity()
         self.__m_modelsGouraudInterpolation = self.__m_vtkFboItem.getGourauInterpolation()
-        Model.setSelectedModelColor(QColor(self.__m_vtkFboItem.getModelColorR(), self.__m_vtkFboItem.getModelColorG(), self.__m_vtkFboItem.getModelColorB()))
+        setSelectedModelColor(QColor(self.__m_vtkFboItem.getModelColorR(), self.__m_vtkFboItem.getModelColorG(), self.__m_vtkFboItem.getModelColorB()))
 
     def render(self):
+        qDebug('QVTKFramebufferObjectRenderer::render()')
         self.__m_vtkRenderWindow.PushState()
         self.openGLInitState()
         self.__m_vtkRenderWindow.Start()
@@ -141,7 +150,7 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, Q
 
             if self.__m_mouseEvent.type() == QEvent.MouseButtonPress:
                 self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.LeftButtonPressEvent, self.__m_mouseEvent.get())
-            else if self.__m_mouseEvent.type() == QEvent.MouseButtonRelease:
+            elif self.__m_mouseEvent.type() == QEvent.MouseButtonRelease:
                 self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.LeftButtonReleaseEvent, self.__m_mouseEvent.get())
 
             self.__m_mouseEvent.accept()
@@ -162,7 +171,7 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, Q
         if self.__m_wheelEvent and not self.__m_wheelEvent.isAccepted():
             if self.__m_wheelEvent.delta() > 0:
                 self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.MouseWheelForwardEvent, self.__m_wheelEvent.get())
-            else if self.__m_wheelEvent.delta() < 0:
+            elif self.__m_wheelEvent.delta() < 0:
                 self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.MouseWheelBackwardEvent, self.__m_wheelEvent.get())
 
             self.__m_wheelEvent.accept()
@@ -213,16 +222,17 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, Q
         QOpenGLFunctions.glUseProgram(0)
 
     def createFramebufferObject(self, size:QSize) -> QOpenGLFramebufferObject:
+        qDebug('QVTKFramebufferObjectRenderer::createFramebufferObject()')
         macSize = QSize(size.width() / 2, size.height() / 2)
 
         format = QOpenGLFramebufferObjectFormat()
         format.setAttachment(QOpenGLFramebufferObject.Depth)
 
-    #ifdef Q_OS_MAC
-        # std::unique_ptr<QOpenGLFramebufferObject> framebufferObject(new QOpenGLFramebufferObject(macSize, format))
-    #else
+    # ifdef Q_OS_MAC
+    #     std::unique_ptr<QOpenGLFramebufferObject> framebufferObject(new QOpenGLFramebufferObject(macSize, format))
+    # else
         framebufferObject = QOpenGLFramebufferObject(size, format)
-    #endif
+    # endif
         self.__m_vtkRenderWindow.SetBackLeftBuffer(GL_COLOR_ATTACHMENT0)
         self.__m_vtkRenderWindow.SetFrontLeftBuffer(GL_COLOR_ATTACHMENT0)
         self.__m_vtkRenderWindow.SetBackBuffer(GL_COLOR_ATTACHMENT0)
@@ -393,7 +403,7 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, Q
 
             #* Set mouse click delta from center position
             self.__m_selectedModel.setMouseDeltaXY(clickPosition[0] - self.__m_selectedModel.getPositionX(), clickPosition[1] - self.__m_selectedModel.getPositionY())
-        else
+        else:
             self.__setIsModelSelected(False)
 
         qDebug('QVTKFramebufferObjectRenderer::__selectModel() end')

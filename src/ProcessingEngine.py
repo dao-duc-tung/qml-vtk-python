@@ -1,11 +1,13 @@
-from PyQt5.QtCore import QObject, QApp, QUrl, qDebug, qCritical, QFileInfo
-from .Model import Model
+from PySide2.QtCore import QObject, QUrl, qDebug, qCritical, QFileInfo
+
+import Model
+import vtk
 
 class ProcessingEngine():
     def __init__(self):
         self.__m_models = [] # List of Model
 
-    def addModel(modelFilePath:QUrl) . Model:
+    def addModel(modelFilePath:QUrl) -> Model:
         qDebug('ProcessingEngine::addModelData()')
         modelFilePathExtension = QFileInfo(modelFilePath.toString()).suffix().toLower() # returns QString
 
@@ -79,7 +81,7 @@ class ProcessingEngine():
 
     def getModelFromActor(self, modelActor:vtk.vtkActor) -> Model:
         for model in self.__m_models:
-            if model.getModelActor() == modelActor
+            if model.getModelActor() == modelActor:
                 return model
         raise Exception('Cannot get model from actor')
         return None

@@ -1,16 +1,16 @@
-from .Model import Model
-from .CommandModel import CommandModel
-from .QVTKFramebufferObjectRenderer import QVTKFramebufferObjectRenderer
+from Model import Model
+from CommandModel import CommandModel
+from QVTKFramebufferObjectRenderer import QVTKFramebufferObjectRenderer
 
 class TranslateParams_t():
     def __init__(self):
         self.model:Model = None
-		self.screenX:int = 0
-		self.screenY:int = 0
-		self.previousPositionX:float = 0.0
-		self.previousPositionY:float = 0.0
-		self.targetPositionX:float = 0.0
-		self.targetPositionY:float = 0.0
+        self.screenX:int = 0
+        self.screenY:int = 0
+        self.previousPositionX:float = 0.0
+        self.previousPositionY:float = 0.0
+        self.targetPositionX:float = 0.0
+        self.targetPositionY:float = 0.0
 
 class CommandModelTranslate(CommandModel):
     def __init__(self, vtkFboRenderer:QVTKFramebufferObjectRenderer, translateData:TranslateParams_t, inTransition:bool):

@@ -46,7 +46,7 @@ ApplicationWindow {
             highlighted: true
             anchors.right: parent.right
             anchors.bottom: parent.bottom
-            anchors.margin: 50
+            anchors.margins: 50
             onClicked: canvasHandler.showFileDiaglog = true
 
             ToolTip.visible: hovered
