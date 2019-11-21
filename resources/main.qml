@@ -47,7 +47,7 @@ ApplicationWindow {
             anchors.right: parent.right
             anchors.bottom: parent.bottom
             anchors.margins: 50
-            onClicked: canvasHandler.showFileDiaglog = true
+            onClicked: canvasHandler.showFileDialog = true;
 
             ToolTip.visible: hovered
             ToolTip.delay: 1000
@@ -79,7 +79,7 @@ ApplicationWindow {
             anchors.top: representationCombobox.bottom
             anchors.leftMargin: 40
             anchors.topMargin: 30
-            onValueChanged: canvasHandler.setModelCapacity(value);
+            onValueChanged: canvasHandler.setModelsOpacity(value);
         }
 
         Switch {
@@ -158,7 +158,7 @@ ApplicationWindow {
         visible: canvasHandler.showFileDialog
         title: "Import model"
         folder: shortcuts.documents
-        nameFilters: ["Model files" + "(*.stl *.STL *.obj *.OBJ)", "All files" + "(*)"]
+        // nameFilters: ["Model files" + "(*.stl *.STL *.obj *.OBJ)", "All files" + "(*)"]
 
         onAccepted: {
             canvasHandler.showFileDialog = false;
