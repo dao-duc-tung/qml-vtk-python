@@ -26,7 +26,8 @@ fmt.setStencilBufferSize(0)
 fmt.setStereo(False)
 fmt.setSamples(0) # we never need multisampling in the context since the FBO can support multisamples independently
 
-class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, QOpenGLFunctions):
+# class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, QOpenGLFunctions):
+class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
     isModelSelectedChanged = Signal(bool)
     selectedModelPositionXChanged = Signal(float)
     selectedModelPositionYChanged = Signal(float)
@@ -101,7 +102,7 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, Q
         self.__m_picker.SetTolerance(0.0)
 
         qDebug('QVTKFramebufferObjectRenderer::__init__() 6')
-        # self.update()
+        self.update()
         qDebug('QVTKFramebufferObjectRenderer::__init__() 7')
 
     def setProcessingEngine(self, processingEngine:ProcessingEngine):

@@ -20,7 +20,7 @@ class CanvasHandler(QObject):
         self.__m_showFileDialog:bool = False
         self.__m_vtkFboItem:QVTKFramebufferObjectItem = None
         #* Set style: https://stackoverflow.com/questions/43093797/PySide2-quickcontrols-material-style
-        sys_argv += ['--style', 'material']
+        sys_argv += ['--style', 'material'] #! MUST HAVE
         app = QApplication(sys_argv)
 
         engine = QQmlApplicationEngine()

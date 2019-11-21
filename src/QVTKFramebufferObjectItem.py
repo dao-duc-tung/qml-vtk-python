@@ -21,6 +21,7 @@ class QVTKFramebufferObjectItem(QQuickFramebufferObject):
 
     #! Must add *args
     def __init__(self, *args):
+        qDebug('QVTKFramebufferObjectItem::__init__')
         super().__init__()
         self.__m_vtkFboRenderer:QVTKFramebufferObjectRenderer = None
         self.__m_processingEngine:ProcessingEngine = ProcessingEngine()
