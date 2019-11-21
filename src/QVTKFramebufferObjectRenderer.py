@@ -101,7 +101,7 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, Q
         self.__m_picker.SetTolerance(0.0)
 
         qDebug('QVTKFramebufferObjectRenderer::__init__() 6')
-        self.update()
+        # self.update()
         qDebug('QVTKFramebufferObjectRenderer::__init__() 7')
 
     def setProcessingEngine(self, processingEngine:ProcessingEngine):
@@ -234,6 +234,7 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, Q
         self.__m_vtkFboItem.window().resetOpenGLState()
 
     def openGLInitState(self):
+        qDebug('QVTKFramebufferObjectRenderer::openGLInitState()')
         self.__m_vtkRenderWindow.OpenGLInitState()
         self.__m_vtkRenderWindow.MakeCurrent()
         QOpenGLFunctions.initializeOpenGLFunctions()
@@ -377,7 +378,6 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, Q
 
     def addModelActor(self, model:Model):
         self.__m_renderer.AddActor(model.getModelActor())
-
         qDebug(f'QVTKFramebufferObjectRenderer::addModelActor(): Model added {model}')
 
     def __selectModel(self, x:np.int16, y:np.int16):
