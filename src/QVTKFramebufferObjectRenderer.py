@@ -27,11 +27,12 @@ fmt.setStereo(False)
 fmt.setSamples(0) # we never need multisampling in the context since the FBO can support multisamples independently
 
 class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, QOpenGLFunctions):
-    isModelSelectedChanged = Signal()
-    selectedModelPositionXChanged = Signal()
-    selectedModelPositionYChanged = Signal()
+    isModelSelectedChanged = Signal(bool)
+    selectedModelPositionXChanged = Signal(float)
+    selectedModelPositionYChanged = Signal(float)
 
     def __init__(self):
+        qDebug('QVTKFramebufferObjectRenderer::__init__()')
         super().__init__()
         self.__m_processingEngine:ProcessingEngine = None
         from QVTKFramebufferObjectItem import QVTKFramebufferObjectItem
@@ -99,9 +100,12 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, Q
         self.__m_picker:vtkCellPicker = vtk.vtkCellPicker()
         self.__m_picker.SetTolerance(0.0)
 
+        qDebug('QVTKFramebufferObjectRenderer::__init__() 6')
         self.update()
+        qDebug('QVTKFramebufferObjectRenderer::__init__() 7')
 
     def setProcessingEngine(self, processingEngine:ProcessingEngine):
+        qDebug('QVTKFramebufferObjectRenderer::setProcessingEngine()')
         self.__m_processingEngine = processingEngine
 
     def synchronize(self, item:QQuickFramebufferObject):
@@ -163,9 +167,9 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, Q
                                                                 1 if self.__m_mouseEvent.type() == QEvent.MouseButtonDblClick else 0)
 
             if self.__m_mouseEvent.type() == QEvent.MouseButtonPress:
-                self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.LeftButtonPressEvent, self.__m_mouseEvent.get())
+                self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.LeftButtonPressEvent, self.__m_mouseEvent)
             elif self.__m_mouseEvent.type() == QEvent.MouseButtonRelease:
-                self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.LeftButtonReleaseEvent, self.__m_mouseEvent.get())
+                self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.LeftButtonReleaseEvent, self.__m_mouseEvent)
 
             self.__m_mouseEvent.accept()
 
@@ -177,16 +181,16 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, Q
                                                                     1 if (self.__m_moveEvent.modifiers() & Qt.ShiftModifier) > 0 else 0, 0,
                                                                     1 if self.__m_moveEvent.type() == QEvent.MouseButtonDblClick else 0)
 
-                self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.MouseMoveEvent, self.__m_moveEvent.get())
+                self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.MouseMoveEvent, self.__m_moveEvent)
 
             self.__m_moveEvent.accept()
 
         #* Process wheel event
         if self.__m_wheelEvent and not self.__m_wheelEvent.isAccepted():
             if self.__m_wheelEvent.delta() > 0:
-                self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.MouseWheelForwardEvent, self.__m_wheelEvent.get())
+                self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.MouseWheelForwardEvent, self.__m_wheelEvent)
             elif self.__m_wheelEvent.delta() < 0:
-                self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.MouseWheelBackwardEvent, self.__m_wheelEvent.get())
+                self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.MouseWheelBackwardEvent, self.__m_wheelEvent)
 
             self.__m_wheelEvent.accept()
 
@@ -374,7 +378,7 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, Q
     def addModelActor(self, model:Model):
         self.__m_renderer.AddActor(model.getModelActor())
 
-        qDebug(f'QVTKFramebufferObjectRenderer::addModelActor(): Model added {model.get()}')
+        qDebug(f'QVTKFramebufferObjectRenderer::addModelActor(): Model added {model}')
 
     def __selectModel(self, x:np.int16, y:np.int16):
         qDebug('QVTKFramebufferObjectRenderer::__selectModel()')
@@ -407,8 +411,8 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, Q
             self.__m_selectedModel.setSelected(True)
 
             #* Connect signals
-            self.__m_selectedModel.get().positionXChanged.connect(self.setSelectedModelPositionX)
-            self.__m_selectedModel.get().positionYChanged.connect(self.setSelectedModelPositionY)
+            self.__m_selectedModel.positionXChanged.connect(self.setSelectedModelPositionX)
+            self.__m_selectedModel.positionYChanged.connect(self.setSelectedModelPositionY)
 
             self.setSelectedModelPositionX(self.__m_selectedModel.getPositionX())
             self.setSelectedModelPositionY(self.__m_selectedModel.getPositionY())
@@ -425,8 +429,8 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, Q
     def __clearSelectedModel(self):
         self.__m_selectedModel.setSelected(False)
 
-        self.__m_selectedModel.get().positionXChanged.disconnect(self.setSelectedModelPositionX)
-        self.__m_selectedModel.get().positionYChanged.disconnect(self.setSelectedModelPositionY)
+        self.__m_selectedModel.positionXChanged.disconnect(self.setSelectedModelPositionX)
+        self.__m_selectedModel.positionYChanged.disconnect(self.setSelectedModelPositionY)
 
         self.__m_selectedModel = None
         self.__m_selectedActor = None
@@ -435,7 +439,7 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, Q
         if self.__m_isModelSelected != isModelSelected:
             qDebug(f'QVTKFramebufferObjectRenderer::__setIsModelSelected(): {isModelSelected}')
             self.__m_isModelSelected = isModelSelected
-            self.isModelSelectedChanged.emit()
+            self.isModelSelectedChanged.emit(isModelSelected)
 
     def isModelSelected(self) -> bool:
         return self.__m_isModelSelected
@@ -450,12 +454,12 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, Q
     def setSelectedModelPositionX(self, positionX:float):
         if self.__m_selectedModelPositionX != positionX:
             self.__m_selectedModelPositionX = positionX
-            self.selectedModelPositionXChanged.emit()
+            self.selectedModelPositionXChanged.emit(positionX)
 
     def setSelectedModelPositionY(self, positionY:float):
         if self.__m_selectedModelPositionY != positionY:
             self.__m_selectedModelPositionY = positionY
-            self.selectedModelPositionYChanged.emit()
+            self.selectedModelPositionYChanged.emit(positionY)
 
     def getSelectedModelPositionX(self) -> float:
         return self.__m_selectedModelPositionX
@@ -489,10 +493,10 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, Q
         placer.SetObliquePlane(plane)
         placer.SetProjectionNormalToOblique()
 
-        placer.AddBoundingPlane(boundingPlanes[0].Get())
-        placer.AddBoundingPlane(boundingPlanes[1].Get())
-        placer.AddBoundingPlane(boundingPlanes[2].Get())
-        placer.AddBoundingPlane(boundingPlanes[3].Get())
+        placer.AddBoundingPlane(boundingPlanes[0])
+        placer.AddBoundingPlane(boundingPlanes[1])
+        placer.AddBoundingPlane(boundingPlanes[2])
+        placer.AddBoundingPlane(boundingPlanes[3])
 
         screenPos = list(0.0 for i in range(0, 2)) # 2 items
         worldOrient = list(0.0 for i in range(0, 9)) # 9 items

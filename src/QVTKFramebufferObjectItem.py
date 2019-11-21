@@ -12,9 +12,9 @@ import threading
 
 class QVTKFramebufferObjectItem(QQuickFramebufferObject):
     rendererInitialized = Signal()
-    isModelSelectedChanged = Signal()
-    selectedModelPositionXChanged = Signal()
-    selectedModelPositionYChanged = Signal()
+    isModelSelectedChanged = Signal(bool)
+    selectedModelPositionXChanged = Signal(float)
+    selectedModelPositionYChanged = Signal(float)
 
     addModelFromFileDone = Signal()
     addModelFromFileError = Signal(str)
@@ -45,6 +45,7 @@ class QVTKFramebufferObjectItem(QQuickFramebufferObject):
         self.setAcceptedMouseButtons(Qt.RightButton)
 
     def createRenderer(self) -> QQuickFramebufferObject.Renderer:
+        qDebug('QVTKFramebufferObjectItem::createRenderer')
         return QVTKFramebufferObjectRenderer()
 
     def setVtkFboRenderer(self, renderer:QVTKFramebufferObjectRenderer):
@@ -212,7 +213,7 @@ class QVTKFramebufferObjectItem(QQuickFramebufferObject):
         return self.__m_commandsQueue.queue[0]
 
     def commandsQueuePop(self):
-        self.__m_commandsQueue.get()
+        self.__m_commandsQueue
 
     def isCommandsQueueEmpty(self) -> bool:
         return self.__m_commandsQueue.empty()

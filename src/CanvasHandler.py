@@ -29,7 +29,7 @@ class CanvasHandler(QObject):
         app.setApplicationName('QtVTK-Py')
 
         #* Register QML Types
-        # qmlRegisterType(QVTKFramebufferObjectItem, 'QtVTK', 1, 0, 'VtkFboItem')
+        qmlRegisterType(QVTKFramebufferObjectItem, 'QtVTK', 1, 0, 'VtkFboItem')
 
         #* Create classes instances
         self.__m_processingEngine = ProcessingEngine()
