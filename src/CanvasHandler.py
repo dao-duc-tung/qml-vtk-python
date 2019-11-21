@@ -1,4 +1,4 @@
-from PySide2.QtCore import QObject, QUrl, qDebug, qCritical, Signal, Property
+from PySide2.QtCore import QObject, QUrl, qDebug, qCritical, Signal, Property, Slot
 from PySide2.QtQml import QQmlApplicationEngine, qmlRegisterType, QQmlEngine
 from PySide2.QtWidgets import QApplication
 
@@ -61,7 +61,7 @@ class CanvasHandler(QObject):
         rc = app.exec_()
         qDebug(f'CanvasHandler::CanvasHandler: Execution finished with return code: {rc}')
 
-    def get_showFileDialog(self):
+    def get_showFileDialog(self) -> bool:
         return self.__m_showFileDialog
 
     def set_showFileDialog(self, val:bool):
@@ -70,46 +70,43 @@ class CanvasHandler(QObject):
         self.__m_showFileDialog = val
         self.showFileDialogChanged.emit(val)
 
-    #! setter doesn't work
-    #! PySide2 has limitations with the Property decorator and its setter since it is not recognized by QML, instead it uses the extensive declaration
+    #! PySide2 has limitations with the Property decorator, its setter since it is not recognized by QML
     #! https://stackoverflow.com/questions/57742024/custom-object-referencing-in-qml-python
     showFileDialog = Property(bool, fget=get_showFileDialog, fset=set_showFileDialog, notify=showFileDialogChanged)
 
-    @Property(bool, notify=isModelSelectedChanged)
-    def isModelSelected(self):
+    def get_isModelSelected(self) -> bool:
         return self.getIsModelSelected()
 
-    @Property(float, notify=selectedModelPositionXChanged)
-    def modelPositionX(self):
+    isModelSelected = Property(bool, fget=get_isModelSelected, fset=None, notify=isModelSelectedChanged)
+
+    def get_modelPositionX(self):
         return self.getSelectedModelPositionX()
 
-    @Property(float, notify=selectedModelPositionYChanged)
-    def modelPositionY(self):
+    modelPositionX = Property(float, fget=get_modelPositionX, fset=None, notify=selectedModelPositionXChanged)
+
+    def get_modelPositionY(self):
         return self.getSelectedModelPositionY()
 
-    def startApplication(self):
-        qDebug('CanvasHandler::startApplication()')
-        self.__m_vtkFboItem.rendererInitialized.disconnect(self.startApplication)
+    modelPositionY = Property(float, fget=get_modelPositionY, fset=None, notify=selectedModelPositionYChanged)
 
-    def openModel(self, path:QUrl):
+    @Slot(str)
+    def openModel(self, path):
         qDebug(f'CanvasHandler::openModel(): {path}')
+        qurl = QUrl(path) # don't use fromLocalFile (it will add file:/// as prefix)
         localFilePath = None
-        if (path.isLocalFile()):
-            localFilePath = path.toLocalFile()
+        if (qurl.isLocalFile()):
+		    # Remove the "file:///" if present
+            localFilePath = qurl.toLocalFile()
         else:
-            localFilePath = path
+            localFilePath = qurl
         self.__m_vtkFboItem.addModelFromFile(localFilePath)
 
-    def __isModelExtensionValid(self, modelPath:QUrl) -> bool:
-        if modelPath.toString().toLower().endsWith('.stl') or modelPath.toString().toLower().endsWith('.obj'):
-            return True
-        else:
-            return False
-
+    @Slot(int,int,int)
     def mousePressEvent(self, button:int, screenX:int, screenY:int):
         qDebug('CanvasHandler::mousePressEvent()')
         self.__m_vtkFboItem.selectModel(screenX, screenY)
 
+    @Slot(int,int,int)
     def mouseMoveEvent(self, button:int, screenX:int, screenY:int):
         if not self.__m_vtkFboItem.isModelSelected():
             return
@@ -124,6 +121,7 @@ class CanvasHandler(QObject):
         translateParams.screenY = screenY
         self.__m_vtkFboItem.translateModel(translateParams, True)
 
+    @Slot(int,int,int)
     def mouseReleaseEvent(self, button:int, screenX:int, screenY:int):
         qDebug('CanvasHandler::mouseReleaseEvent()')
         if not self.__m_vtkFboItem.isModelSelected():
@@ -137,6 +135,35 @@ class CanvasHandler(QObject):
             translateParams.previousPositionX = m_previousWorldX
             translateParams.previousPositionY = m_previousWorldY
             self.__m_vtkFboItem.translateModel(translateParams, False)
+
+    @Slot(int)
+    def setModelsRepresentation(self, representationOption:int):
+        self.__m_vtkFboItem.setModelsRepresentation(representationOption)
+
+    @Slot(float)
+    def setModelsOpacity(self, opacity:float):
+        self.__m_vtkFboItem.setModelsOpacity(opacity)
+
+    @Slot(bool)
+    def setGouraudInterpolation(self, gouraudInterpolation:bool):
+        self.__m_vtkFboItem.setGouraudInterpolation(gouraudInterpolation)
+
+    @Slot(int)
+    def setModelColorR(self, colorR:int):
+        self.__m_vtkFboItem.setModelColorR(colorR)
+
+    @Slot(int)
+    def setModelColorG(self, colorG:int):
+        self.__m_vtkFboItem.setModelColorG(colorG)
+
+    @Slot(int)
+    def setModelColorB(self, colorB:int):
+        self.__m_vtkFboItem.setModelColorB(colorB)
+
+
+    def startApplication(self):
+        qDebug('CanvasHandler::startApplication()')
+        self.__m_vtkFboItem.rendererInitialized.disconnect(self.startApplication)
 
 
     def getIsModelSelected(self) -> bool:
@@ -157,20 +184,9 @@ class CanvasHandler(QObject):
             return 0
         return self.__m_vtkFboItem.getSelectedModelPositionY()
 
-    def setModelsRepresentation(self, representationOption:int):
-        self.__m_vtkFboItem.setModelsRepresentation(representationOption)
 
-    def setModelsOpacity(self, opacity:float):
-        self.__m_vtkFboItem.setModelsOpacity(opacity)
-
-    def setGouraudInterpolation(self, gouraudInterpolation:bool):
-        self.__m_vtkFboItem.setGouraudInterpolation(gouraudInterpolation)
-
-    def setModelColorR(self, colorR:int):
-        self.__m_vtkFboItem.setModelColorR(colorR)
-
-    def setModelColorG(self, colorG:int):
-        self.__m_vtkFboItem.setModelColorG(colorG)
-
-    def setModelColorB(self, colorB:int):
-        self.__m_vtkFboItem.setModelColorB(colorB)
+    def __isModelExtensionValid(self, modelPath:QUrl) -> bool:
+        if modelPath.toString().toLower().endsWith('.stl') or modelPath.toString().toLower().endsWith('.obj'):
+            return True
+        else:
+            return False
