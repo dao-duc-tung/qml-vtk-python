@@ -1,7 +1,6 @@
 from PySide2.QtCore import QObject, QUrl, qDebug, qCritical, QFileInfo, QEvent, Qt, QSize, Signal
 from PySide2.QtGui import QSurfaceFormat, QColor, QMouseEvent, QWheelEvent, QOpenGLFramebufferObject, QOpenGLFramebufferObjectFormat, QOpenGLFunctions
 from PySide2.QtQuick import QQuickFramebufferObject
-from vtk.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 
 from Model import Model, setSelectedModelColor
 from ProcessingEngine import ProcessingEngine
@@ -9,7 +8,6 @@ from ProcessingEngine import ProcessingEngine
 import numpy as np
 import vtk
 
-# from vtk.qt.QVTKRenderWindowInteractor import QV
 
 #* https://github.com/Kitware/VTK/blob/master/GUISupport/Qt/QVTKOpenGLNativeWidget.cxx
 fmt = QSurfaceFormat()

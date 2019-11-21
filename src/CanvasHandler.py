@@ -42,21 +42,21 @@ class CanvasHandler(QObject):
         engine.load(QUrl.fromLocalFile('resources\\main.qml'))
 
         #* Get reference to the QVTKFramebufferObjectItem in QML
-        # rootObject = engine.rootObjects()[0] # returns QObject
-        # self.__m_vtkFboItem = rootObject.findChild(QVTKFramebufferObjectItem, 'vtkFboItem')
+        rootObject = engine.rootObjects()[0] # returns QObject
+        self.__m_vtkFboItem = rootObject.findChild(QVTKFramebufferObjectItem, 'vtkFboItem')
 
         # #* Give the vtkFboItem reference to the CanvasHandler
-        # if (self.__m_vtkFboItem):
-        #     qDebug('CanvasHandler::CanvasHandler: setting vtkFboItem to CanvasHandler')
-        #     self.__m_vtkFboItem.setProcessingEngine(self.__m_processingEngine)
+        if (self.__m_vtkFboItem):
+            qDebug('CanvasHandler::CanvasHandler: setting vtkFboItem to CanvasHandler')
+            self.__m_vtkFboItem.setProcessingEngine(self.__m_processingEngine)
 
-        #     self.__m_vtkFboItem.rendererInitialized.connect(self.startApplication)
-        #     self.__m_vtkFboItem.isModelSelectedChanged.connect(self.isModelSelectedChanged)
-        #     self.__m_vtkFboItem.selectedModelPositionXChanged.connect(self.selectedModelPositionXChanged)
-        #     self.__m_vtkFboItem.selectedModelPositionYChanged.connect(self.selectedModelPositionYChanged)
-        # else:
-        #     qCritical('CanvasHandler::CanvasHandler: Unable to get vtkFboItem instance')
-        #     return
+            self.__m_vtkFboItem.rendererInitialized.connect(self.startApplication)
+            self.__m_vtkFboItem.isModelSelectedChanged.connect(self.isModelSelectedChanged)
+            self.__m_vtkFboItem.selectedModelPositionXChanged.connect(self.selectedModelPositionXChanged)
+            self.__m_vtkFboItem.selectedModelPositionYChanged.connect(self.selectedModelPositionYChanged)
+        else:
+            qCritical('CanvasHandler::CanvasHandler: Unable to get vtkFboItem instance')
+            return
 
         rc = app.exec_()
         qDebug(f'CanvasHandler::CanvasHandler: Execution finished with return code: {rc}')

@@ -19,8 +19,7 @@ class QVTKFramebufferObjectItem(QQuickFramebufferObject):
     addModelFromFileDone = Signal()
     addModelFromFileError = Signal(str)
 
-    #! Must add *args
-    def __init__(self, *args):
+    def __init__(self):
         qDebug('QVTKFramebufferObjectItem::__init__')
         super().__init__()
         self.__m_vtkFboRenderer:QVTKFramebufferObjectRenderer = None
