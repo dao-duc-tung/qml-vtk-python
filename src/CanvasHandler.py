@@ -24,7 +24,7 @@ class CanvasHandler(QObject):
         app = QApplication(sys_argv)
 
         engine = QQmlApplicationEngine()
-        engine.setImportPathList(['C:\\Users\\tungdao\\.conda\\envs\\antc\\Lib\\site-packages\\PySide2\\qml'])
+        engine.setImportPathList(['C:\\Users\\tungdao\\.conda\\envs\\qtvtkpy\\Lib\\site-packages\\PySide2\\qml'])
         # print(engine.importPathList())
         app.setApplicationName('QtVTK-Py')
 
