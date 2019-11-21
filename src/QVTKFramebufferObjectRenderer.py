@@ -79,8 +79,8 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
         #* https://vtk.org/doc/nightly/html/classQVTKOpenGLNativeWidget.html#details
         # QSurfaceFormat.setDefaultFormat(QVTKOpenGLNativeWidget.defaultFormat()) # from vtk 8.2.0
         QSurfaceFormat.setDefaultFormat(fmt)
-        self.__m_vtkRenderWindow:vtkGenericOpenGLRenderWindow = vtk.vtkGenericOpenGLRenderWindow()
-        self.__m_renderer:vtkRenderer = vtk.vtkRenderer()
+        self.__m_vtkRenderWindow:vtk.vtkGenericOpenGLRenderWindow = vtk.vtkGenericOpenGLRenderWindow()
+        self.__m_renderer:vtk.vtkRenderer = vtk.vtkRenderer()
         self.__m_vtkRenderWindow.AddRenderer(self.__m_renderer)
 
         #* Interactor
@@ -98,7 +98,7 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
         self.__m_vtkRenderWindowInteractor.SetInteractorStyle(style)
 
         #* Picker
-        self.__m_picker:vtkCellPicker = vtk.vtkCellPicker()
+        self.__m_picker:vtk.vtkCellPicker = vtk.vtkCellPicker()
         self.__m_picker.SetTolerance(0.0)
 
         qDebug('QVTKFramebufferObjectRenderer::__init__() 6')
