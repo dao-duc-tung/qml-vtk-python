@@ -5,7 +5,7 @@ import os, sys
 
 def set_vtk_log():
     import vtk
-    log_path = os.path.join("vtk_log.txt")
+    log_path = os.path.join("log.ini")
     fow = vtk.vtkFileOutputWindow()
     fow.SetFileName(log_path)
     ow = vtk.vtkOutputWindow()
