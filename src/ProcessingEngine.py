@@ -1,15 +1,15 @@
 from PySide2.QtCore import QObject, QUrl, qDebug, qCritical, QFileInfo
 
-import Model
+from Model import Model
 import vtk
 
 class ProcessingEngine():
     def __init__(self):
         self.__m_models = [] # List of Model
 
-    def addModel(modelFilePath:QUrl) -> Model:
-        qDebug('ProcessingEngine::addModelData()')
-        modelFilePathExtension = QFileInfo(modelFilePath.toString()).suffix().toLower() # returns QString
+    def addModel(self, modelFilePath:QUrl) -> Model:
+        qDebug('ProcessingEngine::addModel()')
+        modelFilePathExtension = QFileInfo(modelFilePath).suffix().lower() # returns QString
 
         objReader = vtk.vtkOBJReader()
         stlReader = vtk.vtkSTLReader()
@@ -17,20 +17,20 @@ class ProcessingEngine():
 
         if modelFilePathExtension == 'obj':
             #* Read OBJ file
-            objReader.SetFileName(modelFilePath.toString().toStdString().c_str())
+            objReader.SetFileName(modelFilePath)
             objReader.Update()
             inputData = objReader.GetOutput()
         else:
             #* Read STL file
-            stlReader.SetFileName(modelFilePath.toString().toStdString().c_str())
+            stlReader.SetFileName(modelFilePath)
             stlReader.Update()
             inputData = stlReader.GetOutput()
 
         #* Preprocess the polydata
-        preprocessedPolydata = preprocessPolydata(inputData) # vtkPolyData
+        preprocessedPolydata = self.preprocessPolydata(inputData) # vtkPolyData
 
         #* Create Model instance and insert it into the vector
-        model = preprocessedPolydata
+        model = Model(preprocessedPolydata)
         self.__m_models.append(model)
 
         return self.__m_models[-1]
@@ -40,16 +40,16 @@ class ProcessingEngine():
         center = [0.0, 0.0, 0.0]
         inputData.GetCenter(center)
 
-        translation = vtkTransform()
+        translation = vtk.vtkTransform()
         translation.Translate(-center[0], -center[1], -center[2])
 
-        transformFilter = vtkTransformPolyDataFilter()
+        transformFilter = vtk.vtkTransformPolyDataFilter()
         transformFilter.SetInputData(inputData)
         transformFilter.SetTransform(translation)
         transformFilter.Update()
 
         #* Normals - For the Gouraud interpolation to work
-        normals = vtkPolyDataNormals()
+        normals = vtk.vtkPolyDataNormals()
         normals.SetInputData(transformFilter.GetOutput())
         normals.ComputePointNormalsOn()
         normals.Update()

@@ -7,6 +7,7 @@ from ProcessingEngine import ProcessingEngine
 
 import numpy as np
 import vtk
+import logging
 
 
 #* https://github.com/Kitware/VTK/blob/master/GUISupport/Qt/QVTKOpenGLNativeWidget.cxx
@@ -21,24 +22,46 @@ fmt.setBlueBufferSize(8)
 fmt.setDepthBufferSize(8)
 fmt.setAlphaBufferSize(8)
 fmt.setStencilBufferSize(0)
-fmt.setStereo(False)
+fmt.setStereo(True)
 fmt.setSamples(0) # we never need multisampling in the context since the FBO can support multisamples independently
 
-# class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer, QOpenGLFunctions):
-class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
+class SquircleInFboRenderer(QQuickFramebufferObject.Renderer):
+    def __init__(self):
+        logging.debug('SquircleInFboRenderer.__init__')
+        super().__init__()
+
+        self.squircle = SquircleRenderer()
+        # self.squircle.initialize()
+        self.update()
+
+    def render( self ):
+        logging.debug('SquircleInFboRenderer.render')
+        self.squircle.render()
+        self.update()
+
+    def synchronize(self, item:QQuickFramebufferObject):
+        logging.debug('SquircleInFboRenderer.render')
+        self.squircle.synchronize(item)
+
+    def createFrameBufferObject( self, size ):
+        logging.debug('SquircleInFboRenderer.createFrameBufferObject')
+        return self.squircle.createFramebufferObject( size )
+
+# class SquircleRenderer(QObject, QQuickFramebufferObject.Renderer, QOpenGLFunctions):
+class SquircleRenderer(QObject):
     isModelSelectedChanged = Signal(bool)
     selectedModelPositionXChanged = Signal(float)
     selectedModelPositionYChanged = Signal(float)
 
     def __init__(self):
-        qDebug('QVTKFramebufferObjectRenderer::__init__()')
+        logging.debug('SquircleRenderer::__init__()')
         super().__init__()
+        self.__m_vtkFboItem = None
+        self.gl = QOpenGLFunctions()
         self.__m_processingEngine:ProcessingEngine = None
-        from QVTKFramebufferObjectItem import QVTKFramebufferObjectItem
-        self.__m_vtkFboItem:QVTKFramebufferObjectItem = None
 
         self.__m_selectedModel:Model = None
-        self.__m_selectedActor:vtkActor = None
+        self.__m_selectedActor:vtk.vtkActor = None
         self.__m_isModelSelected:bool = False
 
         self.__m_selectedModelPositionX:float = 0.0
@@ -47,23 +70,23 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
         self.__m_mouseLeftButton:QMouseEvent = None
         self.__m_mouseEvent:QMouseEvent = None
         self.__m_moveEvent:QMouseEvent = None
-        self.__m_wheelEvent:QWheelEvent = None
+        # self.__m_wheelEvent:QWheelEvent = None
 
-        self.__m_platformModel:vtkCubeSource = None
-        self.__m_platformGrid:vtkPolyData = None
-        self.__m_platformModelActor:vtkActor = None
-        self.__m_platformGridActor:vtkActor = None
+        self.__m_platformModel:vtk.vtkCubeSource = None
+        self.__m_platformGrid:vtk.vtkPolyData = None
+        self.__m_platformModelActor:vtk.vtkActor = None
+        self.__m_platformGridActor:vtk.vtkActor = None
 
         self.__m_platformWidth:float = 200.0
         self.__m_platformDepth:float = 200.0
-        self.__m_platformHeight:float = 200.0
+        # self.__m_platformHeight:float = 200.0
         self.__m_platformThickness:float = 2.0
         self.__m_gridBottomHeight:float = 0.15
         self.__m_gridSize:np.uint16 = 10
 
-        self.__m_camPositionX:float = 0.0
-        self.__m_camPositionY:float = 0.0
-        self.__m_camPositionZ:float = 0.0
+        # self.__m_camPositionX:float = 0.0
+        # self.__m_camPositionY:float = 0.0
+        # self.__m_camPositionZ:float = 0.0
 
         self.__m_clickPositionZ:float = 0.0
 
@@ -99,29 +122,28 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
         self.__m_picker:vtk.vtkCellPicker = vtk.vtkCellPicker()
         self.__m_picker.SetTolerance(0.0)
 
-        qDebug('QVTKFramebufferObjectRenderer::__init__() 6')
-        self.update()
-        qDebug('QVTKFramebufferObjectRenderer::__init__() 7')
+    def setVtkSquircle(self, vtkFboItem):
+        logging.debug('SquircleRenderer::setVtkFboItem()')
+        self.__m_vtkFboItem = vtkFboItem
 
     def setProcessingEngine(self, processingEngine:ProcessingEngine):
-        qDebug('QVTKFramebufferObjectRenderer::setProcessingEngine()')
+        logging.debug('SquircleRenderer::setProcessingEngine()')
         self.__m_processingEngine = processingEngine
 
     def synchronize(self, item:QQuickFramebufferObject):
-        qDebug('QVTKFramebufferObjectRenderer::synchronize()')
+        logging.debug('SquircleRenderer::synchronize()')
         #* the first synchronize
-        if not self.__m_vtkFboItem:
-            from QVTKFramebufferObjectItem import QVTKFramebufferObjectItem
-            self.__m_vtkFboItem = (QVTKFramebufferObjectItem)(item)
+        # if not self.__m_vtkFboItem:
+        #     from QVTKFramebufferObjectItem import QVTKFramebufferObjectItem
+        #     self.__m_vtkFboItem = (QVTKFramebufferObjectItem)(item)
 
-        if not self.__m_vtkFboItem.isInitialized():
-            self.__m_vtkFboItem.setVtkFboRenderer(self)
-            self.__m_vtkFboItem.rendererInitialized.emit()
+        # if not self.__m_vtkFboItem.isInitialized():
+        #     self.__m_vtkFboItem.setVtkSquircleRenderer(self)
+        #     self.__m_vtkFboItem.rendererInitialized.emit()
 
         rendererSize = self.__m_vtkRenderWindow.GetSize()
-
         if self.__m_vtkFboItem.width() != rendererSize[0] or self.__m_vtkFboItem.height() != rendererSize[1]:
-            self.__m_vtkRenderWindow.SetSize(self.__m_vtkFboItem.width(), self.__m_vtkFboItem.height())
+            self.__m_vtkRenderWindow.SetSize(int(self.__m_vtkFboItem.width()), int(self.__m_vtkFboItem.height()))
 
         #* Copy mouse events
         if not self.__m_vtkFboItem.getLastMouseLeftButton().isAccepted():
@@ -136,9 +158,9 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
             self.__m_moveEvent = self.__m_vtkFboItem.getLastMoveEvent()
             self.__m_vtkFboItem.getLastMoveEvent().accept()
 
-        if not self.__m_vtkFboItem.getLastWheelEvent().isAccepted():
-            self.__m_wheelEvent = self.__m_vtkFboItem.getLastWheelEvent()
-            self.__m_vtkFboItem.getLastWheelEvent().accept()
+        # if not self.__m_vtkFboItem.getLastWheelEvent().isAccepted():
+        #     self.__m_wheelEvent = self.__m_vtkFboItem.getLastWheelEvent()
+        #     self.__m_vtkFboItem.getLastWheelEvent().accept()
 
         #* Get extra data
         self.__m_modelsRepresentationOption = self.__m_vtkFboItem.getModelsRepresentation()
@@ -147,7 +169,7 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
         setSelectedModelColor(QColor(self.__m_vtkFboItem.getModelColorR(), self.__m_vtkFboItem.getModelColorG(), self.__m_vtkFboItem.getModelColorB()))
 
     def render(self):
-        qDebug('QVTKFramebufferObjectRenderer::render()')
+        logging.debug('SquircleRenderer::render()')
         self.__m_vtkRenderWindow.PushState()
         self.openGLInitState()
         self.__m_vtkRenderWindow.Start()
@@ -184,20 +206,20 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
 
             self.__m_moveEvent.accept()
 
-        #* Process wheel event
-        if self.__m_wheelEvent and not self.__m_wheelEvent.isAccepted():
-            if self.__m_wheelEvent.delta() > 0:
-                self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.MouseWheelForwardEvent, self.__m_wheelEvent)
-            elif self.__m_wheelEvent.delta() < 0:
-                self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.MouseWheelBackwardEvent, self.__m_wheelEvent)
+        # #* Process wheel event
+        # if self.__m_wheelEvent and not self.__m_wheelEvent.isAccepted():
+        #     if self.__m_wheelEvent.delta() > 0:
+        #         self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.MouseWheelForwardEvent, self.__m_wheelEvent)
+        #     elif self.__m_wheelEvent.delta() < 0:
+        #         self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.MouseWheelBackwardEvent, self.__m_wheelEvent)
 
-            self.__m_wheelEvent.accept()
+        #     self.__m_wheelEvent.accept()
 
         #* Process model related commands
 
         #* Select model
-
         if self.__m_mouseLeftButton and not self.__m_mouseLeftButton.isAccepted():
+            qDebug('1')
             self.__selectModel(self.__m_mouseLeftButton.x(), self.__m_mouseLeftButton.y())
             self.__m_mouseLeftButton.accept()
 
@@ -233,14 +255,14 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
         self.__m_vtkFboItem.window().resetOpenGLState()
 
     def openGLInitState(self):
-        qDebug('QVTKFramebufferObjectRenderer::openGLInitState()')
+        logging.debug('SquircleRenderer::openGLInitState()')
         self.__m_vtkRenderWindow.OpenGLInitState()
         self.__m_vtkRenderWindow.MakeCurrent()
-        QOpenGLFunctions.initializeOpenGLFunctions()
-        QOpenGLFunctions.glUseProgram(0)
+        self.gl.initializeOpenGLFunctions()
+        self.gl.glUseProgram(0)
 
     def createFramebufferObject(self, size:QSize) -> QOpenGLFramebufferObject:
-        qDebug('QVTKFramebufferObjectRenderer::createFramebufferObject()')
+        logging.debug('SquircleRenderer::createFramebufferObject()')
         macSize = QSize(size.width() / 2, size.height() / 2)
 
         format = QOpenGLFramebufferObjectFormat()
@@ -262,7 +284,7 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
         return framebufferObject.release()
 
     def initScene(self):
-        qDebug('QVTKFramebufferObjectRenderer::initScene()')
+        logging.debug('SquircleRenderer::initScene()')
 
         self.__m_vtkRenderWindow.SetOffScreenRendering(True)
 
@@ -300,7 +322,7 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
         self.resetCamera()
 
     def __generatePlatform(self):
-        qDebug('QVTKFramebufferObjectRenderer::__generatePlatform()')
+        logging.debug('SquircleRenderer::__generatePlatform()')
 
         #* Platform Model
         platformModelMapper = vtk.vtkPolyDataMapper()
@@ -336,7 +358,7 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
         self.__updatePlatform()
 
     def __updatePlatform(self):
-        qDebug('QVTKFramebufferObjectRenderer::__updatePlatform()')
+        logging.debug('SquircleRenderer::__updatePlatform()')
 
         #* Platform Model
 
@@ -377,10 +399,10 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
 
     def addModelActor(self, model:Model):
         self.__m_renderer.AddActor(model.getModelActor())
-        qDebug(f'QVTKFramebufferObjectRenderer::addModelActor(): Model added {model}')
+        logging.debug(f'SquircleRenderer::addModelActor(): Model added {model}')
 
     def __selectModel(self, x:np.int16, y:np.int16):
-        qDebug('QVTKFramebufferObjectRenderer::__selectModel()')
+        logging.debug('SquircleRenderer::__selectModel()')
 
         #*  the y-axis flip for the pickin:
         self.__m_picker.Pick(x, self.__m_renderer.GetSize()[1] - y, 0, self.__m_renderer)
@@ -405,7 +427,7 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
         self.__m_selectedModel = self.__getSelectedModelNoLock()
 
         if self.__m_selectedActor:
-            qDebug(f'QVTKFramebufferObjectRenderer::__selectModel(): picked actor {self.__m_selectedActor}')
+            logging.debug(f'SquircleRenderer::__selectModel(): picked actor {self.__m_selectedActor}')
 
             self.__m_selectedModel.setSelected(True)
 
@@ -423,7 +445,7 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
         else:
             self.__setIsModelSelected(False)
 
-        qDebug('QVTKFramebufferObjectRenderer::__selectModel() end')
+        logging.debug('SquircleRenderer::__selectModel() end')
 
     def __clearSelectedModel(self):
         self.__m_selectedModel.setSelected(False)
@@ -436,7 +458,7 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
 
     def __setIsModelSelected(self, isModelSelected:bool):
         if self.__m_isModelSelected != isModelSelected:
-            qDebug(f'QVTKFramebufferObjectRenderer::__setIsModelSelected(): {isModelSelected}')
+            logging.debug(f'SquircleRenderer::__setIsModelSelected(): {isModelSelected}')
             self.__m_isModelSelected = isModelSelected
             self.isModelSelectedChanged.emit(isModelSelected)
 
@@ -466,47 +488,47 @@ class QVTKFramebufferObjectRenderer(QObject, QQuickFramebufferObject.Renderer):
     def getSelectedModelPositionY(self) -> float:
         return self.__m_selectedModelPositionY
 
-    def screenToWorld(self, screenX:np.int16, screenY:np.int16, worldPos:list) -> bool: # list of float
-        #* Create  planes for projection plan:
-        boundingPlanes = list(vtk.vtkPlane() for i in range(0, 4))
+    # def screenToWorld(self, screenX:np.int16, screenY:np.int16, worldPos:list) -> bool: # list of float
+    #     #* Create  planes for projection plan:
+    #     boundingPlanes = list(vtk.vtkPlane() for i in range(0, 4))
 
-        boundingPlanes[0].SetOrigin(0.0, 1000.0, 0.0)
-        boundingPlanes[0].SetNormal(0.0, -1.0, 0.0)
+    #     boundingPlanes[0].SetOrigin(0.0, 1000.0, 0.0)
+    #     boundingPlanes[0].SetNormal(0.0, -1.0, 0.0)
 
-        boundingPlanes[1].SetOrigin(0.0, -1000.0, 0.0)
-        boundingPlanes[1].SetNormal(0.0, 1.0, 0.0)
+    #     boundingPlanes[1].SetOrigin(0.0, -1000.0, 0.0)
+    #     boundingPlanes[1].SetNormal(0.0, 1.0, 0.0)
 
-        boundingPlanes[2].SetOrigin(1000.0, 0.0, 0.0)
-        boundingPlanes[2].SetNormal(-1.0, 0.0, 0.0)
+    #     boundingPlanes[2].SetOrigin(1000.0, 0.0, 0.0)
+    #     boundingPlanes[2].SetNormal(-1.0, 0.0, 0.0)
 
-        boundingPlanes[3].SetOrigin(-1000.0, 0.0, 0.0)
-        boundingPlanes[3].SetNormal(1.0, 0.0, 0.0)
+    #     boundingPlanes[3].SetOrigin(-1000.0, 0.0, 0.0)
+    #     boundingPlanes[3].SetNormal(1.0, 0.0, 0.0)
 
-        #* Create projection plane parallel platform and Z coordinate from clicked position in model
-        plane = vtk.vtkPlane()
-        plane.SetOrigin(0.0, 0.0, self.__m_clickPositionZ)
-        plane.SetNormal(0.0, 0.0, 1.0)
+    #     #* Create projection plane parallel platform and Z coordinate from clicked position in model
+    #     plane = vtk.vtkPlane()
+    #     plane.SetOrigin(0.0, 0.0, self.__m_clickPositionZ)
+    #     plane.SetNormal(0.0, 0.0, 1.0)
 
-        #* Set projection and bounding planes to placer
-        placer = vtk.vtkBoundedPlanePointPlacer()
-        placer.SetObliquePlane(plane)
-        placer.SetProjectionNormalToOblique()
+    #     #* Set projection and bounding planes to placer
+    #     placer = vtk.vtkBoundedPlanePointPlacer()
+    #     placer.SetObliquePlane(plane)
+    #     placer.SetProjectionNormalToOblique()
 
-        placer.AddBoundingPlane(boundingPlanes[0])
-        placer.AddBoundingPlane(boundingPlanes[1])
-        placer.AddBoundingPlane(boundingPlanes[2])
-        placer.AddBoundingPlane(boundingPlanes[3])
+    #     placer.AddBoundingPlane(boundingPlanes[0])
+    #     placer.AddBoundingPlane(boundingPlanes[1])
+    #     placer.AddBoundingPlane(boundingPlanes[2])
+    #     placer.AddBoundingPlane(boundingPlanes[3])
 
-        screenPos = list(0.0 for i in range(0, 2)) # 2 items
-        worldOrient = list(0.0 for i in range(0, 9)) # 9 items
+    #     screenPos = list(0.0 for i in range(0, 2)) # 2 items
+    #     worldOrient = list(0.0 for i in range(0, 9)) # 9 items
 
-        screenPos[0] = screenX
-        #*  the y-axis flip for the pickin:
-        screenPos[1] = self.__m_renderer.GetSize()[1] - screenY
+    #     screenPos[0] = screenX
+    #     #*  the y-axis flip for the pickin:
+    #     screenPos[1] = self.__m_renderer.GetSize()[1] - screenY
 
-        withinBounds = placer.ComputeWorldPosition(self.__m_renderer, screenPos, worldPos, worldOrient) # int16_t
+    #     withinBounds = placer.ComputeWorldPosition(self.__m_renderer, screenPos, worldPos, worldOrient) # int16_t
 
-        return withinBounds
+    #     return withinBounds
 
     def resetCamera(self):
         #* Seting the clipping range here messes with the opacity of the actors prior to moving the camera

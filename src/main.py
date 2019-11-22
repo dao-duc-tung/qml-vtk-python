@@ -2,6 +2,8 @@
 # from PyQt5.QtWidgets import QApplication, QLabel
 from CanvasHandler import CanvasHandler
 import os, sys
+import logging
+logging.basicConfig(filename='log.ini', level=logging.DEBUG)
 
 def set_vtk_log():
     import vtk

@@ -3,13 +3,16 @@ from PySide2.QtCore import QObject, QUrl, qDebug, qCritical, QFileInfo, QThread,
 from ProcessingEngine import ProcessingEngine
 from CommandModel import CommandModel
 from Model import Model
-from QVTKFramebufferObjectRenderer import QVTKFramebufferObjectRenderer
+from QVTKFramebufferObjectRenderer import SquircleInFboRenderer
 
-class CommandModelAdd(QThread, CommandModel):
+class CommandModelAddConnection(QObject):
     ready = Signal()
     done = Signal()
 
-    def __init__(self, vtkFboRenderer:QVTKFramebufferObjectRenderer, processingEngine:ProcessingEngine, modelPath:QUrl):
+class CommandModelAdd(QThread, CommandModel):
+    def __init__(self, vtkFboRenderer:SquircleInFboRenderer, processingEngine:ProcessingEngine, modelPath:QUrl):
+        super().__init__()
+        self.signal_conn = CommandModelAddConnection()
         self.__m_model:Model = None
         self.__m_positionX:float = 0.0
         self.__m_positionY:float = 0.0
@@ -17,7 +20,7 @@ class CommandModelAdd(QThread, CommandModel):
 
         self.__m_processingEngine:ProcessingEngine = processingEngine
         self.__m_modelPath:QUrl = modelPath
-        self._m_vtkFboRenderer:QVTKFramebufferObjectRenderer = vtkFboRenderer
+        self.__m_vtkFboRenderer:SquircleInFboRenderer = vtkFboRenderer
 
     def run(self):
         qDebug('CommandModelAdd::run()')
@@ -26,14 +29,14 @@ class CommandModelAdd(QThread, CommandModel):
         self.__m_processingEngine.placeModel(self.__m_model)
 
         self.__m_ready = True
-        self.ready.emit()
+        self.signal_conn.ready.emit()
 
 
-    def isReady() -> bool:
+    def isReady(self) -> bool:
         return self.__m_ready
 
     def execute(self):
         qDebug('CommandModelAdd::execute()')
 
-        self._m_vtkFboRenderer.addModelActor(self.__m_model)
-        self.done.emit()
+        self.__m_vtkFboRenderer.squircle.addModelActor(self.__m_model)
+        self.signal_conn.done.emit()

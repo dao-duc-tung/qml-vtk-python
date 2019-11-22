@@ -1,6 +1,6 @@
 from Model import Model
 from CommandModel import CommandModel
-from QVTKFramebufferObjectRenderer import QVTKFramebufferObjectRenderer
+from QVTKFramebufferObjectRenderer import SquircleInFboRenderer
 
 class TranslateParams_t():
     def __init__(self):
@@ -13,11 +13,11 @@ class TranslateParams_t():
         self.targetPositionY:float = 0.0
 
 class CommandModelTranslate(CommandModel):
-    def __init__(self, vtkFboRenderer:QVTKFramebufferObjectRenderer, translateData:TranslateParams_t, inTransition:bool):
+    def __init__(self, vtkFboRenderer, translateData:TranslateParams_t, inTransition:bool):
         self.__m_translateParams:TranslateParams_t = translateData
         self.__m_inTransition:bool = inTransition
         self.__m_needsTransformation:bool = True
-        self._m_vtkFboRenderer:QVTKFramebufferObjectRenderer = vtkFboRenderer
+        self.__m_vtkFboRenderer = vtkFboRenderer
 
     def isReady(self) -> bool:
         return True
@@ -25,7 +25,7 @@ class CommandModelTranslate(CommandModel):
     def __transformCoordinates(self):
         worldCoordinates = [0.0, 0.0, 0.0]
 
-        if self._m_vtkFboRenderer.screenToWorld(self.__m_translateParams.screenX, self.__m_translateParams.screenY, worldCoordinates):
+        if self.__m_vtkFboRenderer.screenToWorld(self.__m_translateParams.screenX, self.__m_translateParams.screenY, worldCoordinates):
             self.__m_translateParams.targetPositionX = worldCoordinates[0] - self.__m_translateParams.model.getMouseDeltaX()
             self.__m_translateParams.targetPositionY = worldCoordinates[1] - self.__m_translateParams.model.getMouseDeltaY()
 
