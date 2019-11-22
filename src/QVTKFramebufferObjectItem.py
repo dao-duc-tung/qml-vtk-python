@@ -4,7 +4,7 @@ from PySide2.QtQuick import QQuickFramebufferObject
 
 from CommandModelAdd import CommandModel
 from CommandModelAdd import CommandModelAdd
-# from CommandModelTranslate import CommandModelTranslate, TranslateParams_t
+from CommandModelTranslate import CommandModelTranslate, TranslateParams_t
 from ProcessingEngine import ProcessingEngine
 from QVTKFramebufferObjectRenderer import SquircleInFboRenderer
 import queue
@@ -75,10 +75,10 @@ class Squircle(QQuickFramebufferObject):
         return self.__m_vtkFboRenderer.squircle.isModelSelected()
 
     def getSelectedModelPositionX(self) -> float:
-        return self.__m_vtkFboRenderer.getSelectedModelPositionX()
+        return self.__m_vtkFboRenderer.squircle.getSelectedModelPositionX()
 
     def getSelectedModelPositionY(self) -> float:
-        return self.__m_vtkFboRenderer.getSelectedModelPositionY()
+        return self.__m_vtkFboRenderer.squircle.getSelectedModelPositionY()
 
     def selectModel(self, screenX:int, screenY:int):
         self.__m_lastMouseLeftButton = QMouseEvent(QEvent.Type.None_, QPointF(screenX, screenY), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
@@ -101,15 +101,15 @@ class Squircle(QQuickFramebufferObject):
         command.start()
         self.__addCommand(command)
 
-    # def translateModel(self, translateData:TranslateParams_t, inTransition:bool):
-    #     if translateData.model == None:
-    #         #* If no model selected yet, try to select one
-    #         translateData.model = self.__m_vtkFboRenderer.getSelectedModel()
+    def translateModel(self, translateData:TranslateParams_t, inTransition:bool):
+        if translateData.model == None:
+            #* If no model selected yet, try to select one
+            translateData.model = self.__m_vtkFboRenderer.squircle.getSelectedModel()
 
-    #         if translateData.model == None:
-    #             return
+            if translateData.model == None:
+                return
 
-    #     self.__addCommand(CommandModelTranslate(self.__m_vtkFboRenderer, translateData, inTransition))
+        self.__addCommand(CommandModelTranslate(self.__m_vtkFboRenderer, translateData, inTransition))
 
 
     def __addCommand(self, command:CommandModel):
@@ -129,13 +129,13 @@ class Squircle(QQuickFramebufferObject):
 
     def mousePressEvent(self, e:QMouseEvent):
         if e.buttons() & Qt.RightButton:
-            self.__m_lastMouseButton = QMouseEvent(e)
+            self.__m_lastMouseButton = e
             self.__m_lastMouseButton.ignore()
             e.accept()
             self.update()
 
     def mouseReleaseEvent(self, e:QMouseEvent):
-        self.__m_lastMouseButton = QMouseEvent(e)
+        self.__m_lastMouseButton = e
         self.__m_lastMouseButton.ignore()
         e.accept()
         self.update()

@@ -132,8 +132,8 @@ class CanvasHandler(QObject):
             translateParams = TranslateParams_t()
             translateParams.screenX = screenX
             translateParams.screenY = screenY
-            translateParams.previousPositionX = m_previousWorldX
-            translateParams.previousPositionY = m_previousWorldY
+            translateParams.previousPositionX = self.__m_previousWorldX
+            translateParams.previousPositionY = self.__m_previousWorldY
             self.__m_vtkFboItem.translateModel(translateParams, False)
 
     @Slot(int)

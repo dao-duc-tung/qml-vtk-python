@@ -83,5 +83,6 @@ class ProcessingEngine():
         for model in self.__m_models:
             if model.getModelActor() == modelActor:
                 return model
-        raise Exception('Cannot get model from actor')
+        # raise Exception('Cannot get model from actor')
+        qDebug('Cannot get model from actor')
         return None

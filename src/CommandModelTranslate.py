@@ -25,7 +25,7 @@ class CommandModelTranslate(CommandModel):
     def __transformCoordinates(self):
         worldCoordinates = [0.0, 0.0, 0.0]
 
-        if self.__m_vtkFboRenderer.screenToWorld(self.__m_translateParams.screenX, self.__m_translateParams.screenY, worldCoordinates):
+        if self.__m_vtkFboRenderer.squircle.screenToWorld(self.__m_translateParams.screenX, self.__m_translateParams.screenY, worldCoordinates):
             self.__m_translateParams.targetPositionX = worldCoordinates[0] - self.__m_translateParams.model.getMouseDeltaX()
             self.__m_translateParams.targetPositionY = worldCoordinates[1] - self.__m_translateParams.model.getMouseDeltaY()
 
