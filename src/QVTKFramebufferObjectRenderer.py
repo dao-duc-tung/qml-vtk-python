@@ -8,6 +8,7 @@ from ProcessingEngine import ProcessingEngine
 import numpy as np
 import vtk
 import logging
+from OpenGL import GL
 
 
 #* https://github.com/Kitware/VTK/blob/master/GUISupport/Qt/QVTKOpenGLNativeWidget.cxx
@@ -30,18 +31,20 @@ class SquircleInFboRenderer(QQuickFramebufferObject.Renderer):
         super().__init__()
 
         self.squircle = SquircleRenderer()
+        self.__fbo = None
         # self.squircle.initialize()
-        self.update()
+        # self.update()
 
     def render( self ):
         self.squircle.render()
-        self.update()
+        # self.update()
 
     def synchronize(self, item:QQuickFramebufferObject):
         self.squircle.synchronize(item)
 
-    def createFrameBufferObject( self, size ):
-        return self.squircle.createFramebufferObject( size )
+    # def createFramebufferObject( self, size ):
+    #     self.__fbo = self.squircle.createFramebufferObject( size )
+    #     return self.__fbo
 
 # class SquircleRenderer(QObject, QQuickFramebufferObject.Renderer, QOpenGLFunctions):
 class SquircleRenderer(QObject):
@@ -99,7 +102,7 @@ class SquircleRenderer(QObject):
         #* Renderer
         #* https://vtk.org/doc/nightly/html/classQVTKOpenGLNativeWidget.html#details
         # QSurfaceFormat.setDefaultFormat(QVTKOpenGLNativeWidget.defaultFormat()) # from vtk 8.2.0
-        QSurfaceFormat.setDefaultFormat(fmt)
+        # QSurfaceFormat.setDefaultFormat(fmt)
         self.__m_vtkRenderWindow:vtk.vtkGenericOpenGLRenderWindow = vtk.vtkGenericOpenGLRenderWindow()
         self.__m_renderer:vtk.vtkRenderer = vtk.vtkRenderer()
         self.__m_vtkRenderWindow.AddRenderer(self.__m_renderer)
@@ -289,15 +292,15 @@ class SquircleRenderer(QObject):
     # else
         framebufferObject = QOpenGLFramebufferObject(size, format)
     # endif
-        self.__m_vtkRenderWindow.SetBackLeftBuffer(GL_COLOR_ATTACHMENT0)
-        self.__m_vtkRenderWindow.SetFrontLeftBuffer(GL_COLOR_ATTACHMENT0)
-        self.__m_vtkRenderWindow.SetBackBuffer(GL_COLOR_ATTACHMENT0)
-        self.__m_vtkRenderWindow.SetFrontBuffer(GL_COLOR_ATTACHMENT0)
+        self.__m_vtkRenderWindow.SetBackLeftBuffer(GL.GL_COLOR_ATTACHMENT0)
+        self.__m_vtkRenderWindow.SetFrontLeftBuffer(GL.GL_COLOR_ATTACHMENT0)
+        self.__m_vtkRenderWindow.SetBackBuffer(GL.GL_COLOR_ATTACHMENT0)
+        self.__m_vtkRenderWindow.SetFrontBuffer(GL.GL_COLOR_ATTACHMENT0)
         self.__m_vtkRenderWindow.SetSize(framebufferObject.size().width(), framebufferObject.size().height())
         self.__m_vtkRenderWindow.SetOffScreenRendering(True)
         self.__m_vtkRenderWindow.Modified()
-
-        return framebufferObject.release()
+        framebufferObject.release()
+        return framebufferObject
 
     def initScene(self):
         qDebug('SquircleRenderer::initScene()')
@@ -314,25 +317,26 @@ class SquircleRenderer(QObject):
         g1 = 170.0 / 255.0
         b1 = 170.0 / 255.0
 
-        self.__m_renderer.SetBackground(r2, g2, b2)
-        self.__m_renderer.SetBackground2(r1, g1, b1)
+        self.__m_renderer.SetBackground(255,255,255)
+        # self.__m_renderer.SetBackground(r2, g2, b2)
+        # self.__m_renderer.SetBackground2(r1, g1, b1)
         self.__m_renderer.GradientBackgroundOn()
 
-        #* Axes
-        axes = vtk.vtkAxesActor()
-        axes_length = 20.0
-        axes_label_font_size = np.int16(20)
-        axes.SetTotalLength(axes_length, axes_length, axes_length)
-        axes.GetXAxisCaptionActor2D().GetTextActor().SetTextScaleModeToNone()
-        axes.GetYAxisCaptionActor2D().GetTextActor().SetTextScaleModeToNone()
-        axes.GetZAxisCaptionActor2D().GetTextActor().SetTextScaleModeToNone()
-        axes.GetXAxisCaptionActor2D().GetCaptionTextProperty().SetFontSize(axes_label_font_size)
-        axes.GetYAxisCaptionActor2D().GetCaptionTextProperty().SetFontSize(axes_label_font_size)
-        axes.GetZAxisCaptionActor2D().GetCaptionTextProperty().SetFontSize(axes_label_font_size)
-        self.__m_renderer.AddActor(axes)
+        # #* Axes
+        # axes = vtk.vtkAxesActor()
+        # axes_length = 20.0
+        # axes_label_font_size = np.int16(20)
+        # axes.SetTotalLength(axes_length, axes_length, axes_length)
+        # axes.GetXAxisCaptionActor2D().GetTextActor().SetTextScaleModeToNone()
+        # axes.GetYAxisCaptionActor2D().GetTextActor().SetTextScaleModeToNone()
+        # axes.GetZAxisCaptionActor2D().GetTextActor().SetTextScaleModeToNone()
+        # axes.GetXAxisCaptionActor2D().GetCaptionTextProperty().SetFontSize(axes_label_font_size)
+        # axes.GetYAxisCaptionActor2D().GetCaptionTextProperty().SetFontSize(axes_label_font_size)
+        # axes.GetZAxisCaptionActor2D().GetCaptionTextProperty().SetFontSize(axes_label_font_size)
+        # self.__m_renderer.AddActor(axes)
 
-        #* Platform
-        self.__generatePlatform()
+        # #* Platform
+        # self.__generatePlatform()
 
         #* Initial camera position
         self.resetCamera()

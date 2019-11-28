@@ -91,7 +91,7 @@ class Squircle(QQuickFramebufferObject):
         self.update()
 
     def addModelFromFile(self, modelPath):
-        logging.debug('Squircle::addModelFromFile')
+        qDebug('Squircle::addModelFromFile')
 
         command = CommandModelAdd(self.__m_vtkFboRenderer, self.__m_processingEngine, modelPath)
 

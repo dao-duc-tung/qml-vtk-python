@@ -24,7 +24,7 @@ class CanvasHandler(QObject):
         app = QApplication(sys_argv)
 
         engine = QQmlApplicationEngine()
-        engine.setImportPathList(['C:\\Users\\tungdao\\.conda\\envs\\qtvtkpy\\Lib\\site-packages\\PySide2\\qml'])
+        # engine.setImportPathList(['C:\\Users\\tungdao\\.conda\\envs\\qtvtkpy\\Lib\\site-packages\\PySide2\\qml'])
         # print(engine.importPathList())
         app.setApplicationName('QtVTK-Py')
 
@@ -48,7 +48,7 @@ class CanvasHandler(QObject):
         # # #* Give the vtkFboItem reference to the CanvasHandler
         if (self.__m_vtkFboItem):
             qDebug('CanvasHandler::CanvasHandler: setting vtkFboItem to CanvasHandler')
-            self.__m_vtkFboItem.setProcessingEngine(self.__m_processingEngine)
+            # self.__m_vtkFboItem.setProcessingEngine(self.__m_processingEngine)
 
             self.__m_vtkFboItem.rendererInitialized.connect(self.startApplication)
             self.__m_vtkFboItem.isModelSelectedChanged.connect(self.isModelSelectedChanged)
