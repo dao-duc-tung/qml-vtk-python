@@ -2,7 +2,7 @@ from PySide2.QtCore import QObject, QUrl, qDebug, qCritical, Signal, Property, S
 from PySide2.QtQml import QQmlApplicationEngine, qmlRegisterType, QQmlEngine
 from PySide2.QtWidgets import QApplication
 
-from QVTKFramebufferObjectItem import QVTKFramebufferObjectItem
+from QVTKFramebufferObjectItem import Squircle
 from CommandModelTranslate import TranslateParams_t
 from ProcessingEngine import ProcessingEngine
 
@@ -18,34 +18,34 @@ class CanvasHandler(QObject):
         self.__m_previousWorldY:float = 0.0
         self.__m_draggingMouse:bool = False
         self.__m_showFileDialog:bool = False
-        self.__m_vtkFboItem:QVTKFramebufferObjectItem = None
+        self.__m_vtkFboItem = None
         #* Set style: https://stackoverflow.com/questions/43093797/PySide2-quickcontrols-material-style
         sys_argv += ['--style', 'material'] #! MUST HAVE
         app = QApplication(sys_argv)
 
         engine = QQmlApplicationEngine()
-        engine.setImportPathList(['C:\\Users\\tungdao\\.conda\\envs\\qtvtkpy\\Lib\\site-packages\\PySide2\\qml'])
+        # engine.setImportPathList(['C:\\Users\\tungdao\\.conda\\envs\\qtvtkpy\\Lib\\site-packages\\PySide2\\qml'])
         # print(engine.importPathList())
         app.setApplicationName('QtVTK-Py')
 
         #* Register QML Types
-        qmlRegisterType(QVTKFramebufferObjectItem, 'QtVTK', 1, 0, 'VtkFboItem')
+        qmlRegisterType(Squircle, 'QtVTK', 1, 0, 'VtkFboItem')
 
-        #* Create classes instances
+        # #* Create classes instances
         self.__m_processingEngine = ProcessingEngine()
 
-        #* Expose/Bind Python classes (QObject) to QML
+        # #* Expose/Bind Python classes (QObject) to QML
         ctxt = engine.rootContext() # returns QQmlContext
         ctxt.setContextProperty('canvasHandler', self)
 
-        #* Load main QML file
+        # #* Load main QML file
         engine.load(QUrl.fromLocalFile('resources\\main.qml'))
 
-        #* Get reference to the QVTKFramebufferObjectItem in QML
+        # #* Get reference to the QVTKFramebufferObjectItem in QML
         rootObject = engine.rootObjects()[0] # returns QObject
-        self.__m_vtkFboItem = rootObject.findChild(QVTKFramebufferObjectItem, 'vtkFboItem')
+        self.__m_vtkFboItem = rootObject.findChild(Squircle, 'vtkFboItem')
 
-        # #* Give the vtkFboItem reference to the CanvasHandler
+        # # #* Give the vtkFboItem reference to the CanvasHandler
         if (self.__m_vtkFboItem):
             qDebug('CanvasHandler::CanvasHandler: setting vtkFboItem to CanvasHandler')
             self.__m_vtkFboItem.setProcessingEngine(self.__m_processingEngine)
@@ -132,8 +132,8 @@ class CanvasHandler(QObject):
             translateParams = TranslateParams_t()
             translateParams.screenX = screenX
             translateParams.screenY = screenY
-            translateParams.previousPositionX = m_previousWorldX
-            translateParams.previousPositionY = m_previousWorldY
+            translateParams.previousPositionX = self.__m_previousWorldX
+            translateParams.previousPositionY = self.__m_previousWorldY
             self.__m_vtkFboItem.translateModel(translateParams, False)
 
     @Slot(int)

@@ -3,7 +3,7 @@ src/info.json
 src/log.txt
 tempcron.txt
 .vscode/
-vtk_log.txt
+*.ini
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

@@ -1,16 +1,10 @@
 from abc import ABC, ABCMeta, abstractmethod
 
-from QVTKFramebufferObjectRenderer import QVTKFramebufferObjectRenderer
+from QVTKFramebufferObjectRenderer import SquircleInFboRenderer
 
 class CommandModel():
-    @property
-    def _m_vtkFboRenderer(self) -> QVTKFramebufferObjectRenderer:
-        return QVTKFramebufferObjectRenderer()
-
-    @abstractmethod
     def isReady(self) -> bool:
-        pass
+        raise Exception('Not implemented')
 
-    @abstractmethod
     def execute(self):
-        pass
+        raise Exception('Not implemented')

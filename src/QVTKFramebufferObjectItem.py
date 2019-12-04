@@ -6,11 +6,12 @@ from CommandModelAdd import CommandModel
 from CommandModelAdd import CommandModelAdd
 from CommandModelTranslate import CommandModelTranslate, TranslateParams_t
 from ProcessingEngine import ProcessingEngine
-from QVTKFramebufferObjectRenderer import QVTKFramebufferObjectRenderer
+from QVTKFramebufferObjectRenderer import SquircleInFboRenderer
 import queue
 import threading
+import logging
 
-class QVTKFramebufferObjectItem(QQuickFramebufferObject):
+class Squircle(QQuickFramebufferObject):
     rendererInitialized = Signal()
     isModelSelectedChanged = Signal(bool)
     selectedModelPositionXChanged = Signal(float)
@@ -20,10 +21,10 @@ class QVTKFramebufferObjectItem(QQuickFramebufferObject):
     addModelFromFileError = Signal(str)
 
     def __init__(self):
-        qDebug('QVTKFramebufferObjectItem::__init__')
+        logging.debug('Squircle::__init__')
         super().__init__()
-        self.__m_vtkFboRenderer:QVTKFramebufferObjectRenderer = None
-        self.__m_processingEngine:ProcessingEngine = ProcessingEngine()
+        self.__m_vtkFboRenderer = None
+        self.__m_processingEngine:ProcessingEngine = None
 
         self.__m_commandsQueue:queue.Queue = queue.Queue() # CommandModel
         self.__m_commandsQueueMutex = threading.Lock()
@@ -44,20 +45,23 @@ class QVTKFramebufferObjectItem(QQuickFramebufferObject):
         self.setMirrorVertically(True) # QtQuick and OpenGL have opposite Y-Axis directions
         self.setAcceptedMouseButtons(Qt.RightButton)
 
-    def createRenderer(self) -> QQuickFramebufferObject.Renderer:
-        qDebug('QVTKFramebufferObjectItem::createRenderer')
-        return QVTKFramebufferObjectRenderer()
+    def createRenderer(self):
+        logging.debug('Squircle::createRenderer')
+        self.setVtkFboRenderer(SquircleInFboRenderer())
+        return self.__m_vtkFboRenderer
 
-    def setVtkFboRenderer(self, renderer:QVTKFramebufferObjectRenderer):
-        qDebug('QVTKFramebufferObjectItem::setVtkFboRenderer')
+    def setVtkFboRenderer(self, renderer):
+        logging.debug('Squircle::setVtkFboRenderer')
 
         self.__m_vtkFboRenderer = renderer
+        self.__m_vtkFboRenderer.squircle.setVtkSquircle(self)
 
-        self.__m_vtkFboRenderer.isModelSelectedChanged.connect(self.isModelSelectedChanged)
-        self.__m_vtkFboRenderer.selectedModelPositionXChanged.connect(self.selectedModelPositionXChanged)
-        self.__m_vtkFboRenderer.selectedModelPositionYChanged.connect(self.selectedModelPositionYChanged)
+        self.__m_vtkFboRenderer.squircle.isModelSelectedChanged.connect(self.isModelSelectedChanged)
+        self.__m_vtkFboRenderer.squircle.selectedModelPositionXChanged.connect(self.selectedModelPositionXChanged)
+        self.__m_vtkFboRenderer.squircle.selectedModelPositionYChanged.connect(self.selectedModelPositionYChanged)
 
-        self.__m_vtkFboRenderer.setProcessingEngine(self.__m_processingEngine)
+        self.__m_vtkFboRenderer.squircle.setProcessingEngine(self.__m_processingEngine)
+        self.rendererInitialized.emit()
 
     def isInitialized(self) -> bool:
         return (self.__m_vtkFboRenderer != None)
@@ -65,19 +69,19 @@ class QVTKFramebufferObjectItem(QQuickFramebufferObject):
     def setProcessingEngine(self, processingEngine:ProcessingEngine):
         self.__m_processingEngine = processingEngine
 
-    #* Model releated functions
+    # #* Model releated functions
 
     def isModelSelected(self) -> bool:
-        return self.__m_vtkFboRenderer.isModelSelected()
+        return self.__m_vtkFboRenderer.squircle.isModelSelected()
 
     def getSelectedModelPositionX(self) -> float:
-        return self.__m_vtkFboRenderer.getSelectedModelPositionX()
+        return self.__m_vtkFboRenderer.squircle.getSelectedModelPositionX()
 
     def getSelectedModelPositionY(self) -> float:
-        return self.__m_vtkFboRenderer.getSelectedModelPositionY()
+        return self.__m_vtkFboRenderer.squircle.getSelectedModelPositionY()
 
     def selectModel(self, screenX:int, screenY:int):
-        self.__m_lastMouseLeftButton = QMouseEvent(QEvent.None_, QPointF(screenX, screenY), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
+        self.__m_lastMouseLeftButton = QMouseEvent(QEvent.Type.None_, QPointF(screenX, screenY), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
         self.__m_lastMouseLeftButton.ignore()
         self.update()
 
@@ -86,13 +90,13 @@ class QVTKFramebufferObjectItem(QQuickFramebufferObject):
         self.__m_lastMouseLeftButton.ignore()
         self.update()
 
-    def addModelFromFile(self, modelPath:QUrl):
-        qDebug('QVTKFramebufferObjectItem::addModelFromFile')
+    def addModelFromFile(self, modelPath):
+        qDebug('Squircle::addModelFromFile')
 
         command = CommandModelAdd(self.__m_vtkFboRenderer, self.__m_processingEngine, modelPath)
 
-        command.ready.connect(self.update)
-        command.done.connect(self.addModelFromFileDone)
+        command.signal_conn.ready.connect(self.update)
+        command.signal_conn.done.connect(self.addModelFromFileDone)
 
         command.start()
         self.__addCommand(command)
@@ -100,7 +104,7 @@ class QVTKFramebufferObjectItem(QQuickFramebufferObject):
     def translateModel(self, translateData:TranslateParams_t, inTransition:bool):
         if translateData.model == None:
             #* If no model selected yet, try to select one
-            translateData.model = self.__m_vtkFboRenderer.getSelectedModel()
+            translateData.model = self.__m_vtkFboRenderer.squircle.getSelectedModel()
 
             if translateData.model == None:
                 return
@@ -110,55 +114,64 @@ class QVTKFramebufferObjectItem(QQuickFramebufferObject):
 
     def __addCommand(self, command:CommandModel):
         self.__m_commandsQueueMutex.acquire()
-        self.__m_commandsQueue.push(command)
+        self.__m_commandsQueue.put(command)
         self.__m_commandsQueueMutex.release()
         self.update()
 
 
-    #* Camera related functions
+    # #* Camera related functions
 
-    def wheelEvent(self, e:QWheelEvent):
-        self.__m_lastMouseWheel = QWheelEvent(e)
-        self.__m_lastMouseWheel.ignore()
-        e.accept()
-        self.update()
+    # def wheelEvent(self, e:QWheelEvent):
+    #     self.__m_lastMouseWheel = QWheelEvent(e)
+    #     self.__m_lastMouseWheel.ignore()
+    #     e.accept()
+    #     self.update()
 
     def mousePressEvent(self, e:QMouseEvent):
         if e.buttons() & Qt.RightButton:
-            self.__m_lastMouseButton = QMouseEvent(e)
+            self.__m_lastMouseButton = self.__cloneMouseEvent(e)
             self.__m_lastMouseButton.ignore()
             e.accept()
             self.update()
 
     def mouseReleaseEvent(self, e:QMouseEvent):
-        self.__m_lastMouseButton = QMouseEvent(e)
+        self.__m_lastMouseButton = self.__cloneMouseEvent(e)
         self.__m_lastMouseButton.ignore()
         e.accept()
         self.update()
 
     def mouseMoveEvent(self, e:QMouseEvent):
         if e.buttons() & Qt.RightButton:
-            self.__m_lastMouseMove = e
+            self.__m_lastMouseMove = self.__cloneMouseEvent(e)
             self.__m_lastMouseMove.ignore()
             e.accept()
             self.update()
 
 
-    def getLastMouseLeftButton(self) -> QMouseEvent:
-        return self.__m_lastMouseLeftButton
+    def getLastMouseLeftButton(self, clone=True) -> QMouseEvent:
+        if clone:
+            return self.__cloneMouseEvent(self.__m_lastMouseLeftButton)
+        else:
+            return self.__m_lastMouseLeftButton
 
-    def getLastMouseButton(self) -> QMouseEvent:
-        return self.__m_lastMouseButton
+    def getLastMouseButton(self, clone=True) -> QMouseEvent:
+        if clone:
+            return self.__cloneMouseEvent(self.__m_lastMouseButton)
+        else:
+            return self.__m_lastMouseButton
 
-    def getLastMoveEvent(self) -> QMouseEvent:
-        return self.__m_lastMouseMove
+    def getLastMoveEvent(self, clone=True) -> QMouseEvent:
+        if clone:
+            return self.__cloneMouseEvent(self.__m_lastMouseMove)
+        else:
+            return self.__m_lastMouseMove
 
-    def getLastWheelEvent(self) -> QWheelEvent:
-        return self.__m_lastMouseWheel
+    # def getLastWheelEvent(self) -> QWheelEvent:
+    #     return self.__m_lastMouseWheel
 
 
     def resetCamera(self):
-        self.__m_vtkFboRenderer.resetCamera()
+        self.__m_vtkFboRenderer.squircle.resetCamera()
         self.update()
 
     def getModelsRepresentation(self) -> int:
@@ -213,7 +226,7 @@ class QVTKFramebufferObjectItem(QQuickFramebufferObject):
         return self.__m_commandsQueue.queue[0]
 
     def commandsQueuePop(self):
-        self.__m_commandsQueue
+        self.__m_commandsQueue.get()
 
     def isCommandsQueueEmpty(self) -> bool:
         return self.__m_commandsQueue.empty()
@@ -223,3 +236,13 @@ class QVTKFramebufferObjectItem(QQuickFramebufferObject):
 
     def unlockCommandsQueueMutex(self):
         self.__m_commandsQueueMutex.release()
+
+    def __cloneMouseEvent(self, e:QMouseEvent):
+        event_type = e.type()
+        local_pos = e.localPos()
+        button = e.button()
+        buttons = e.buttons()
+        modifiers = e.modifiers()
+        clone = QMouseEvent(event_type, local_pos, button, buttons, modifiers)
+        clone.ignore()
+        return clone

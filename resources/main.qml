@@ -33,6 +33,10 @@ ApplicationWindow {
                 }
                 onPressed: {
                     canvasHandler.mousePressEvent(pressedButtons, mouseX, mouseY);
+                    // if u want to propagate the pressed event
+                    // so the VtkFboItem instance can receive it
+                    // then uncomment the belowed line
+                    // mouse.ignore() // or mouse.accepted = false
                 }
                 onReleased: {
                     canvasHandler.mouseReleaseEvent(pressedButtons, mouseX, mouseY);

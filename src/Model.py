@@ -15,6 +15,7 @@ class Model(QObject):
     positionYChanged = Signal(float)
 
     def __init__(self, modelData:vtk.vtkPolyData):
+        super().__init__()
         self.__m_propertiesMutex = threading.Lock()
         self.__m_positionX:float = 0.0
         self.__m_positionY:float = 0.0
@@ -27,15 +28,15 @@ class Model(QObject):
         self.__m_positionZ:float = self.__m_modelData.GetBounds()[4]
 
         translation = vtk.vtkTransform()
-        translation.Translate(m_positionX, m_positionY, m_positionZ)
+        translation.Translate(self.__m_positionX, self.__m_positionY, self.__m_positionZ)
 
         self.__m_modelFilterTranslate:vtk.vtkTransformPolyDataFilter = vtk.vtkTransformPolyDataFilter()
-        self.__m_modelFilterTranslate.SetInputData(m_modelData)
+        self.__m_modelFilterTranslate.SetInputData(self.__m_modelData)
         self.__m_modelFilterTranslate.SetTransform(translation)
         self.__m_modelFilterTranslate.Update()
 
         #* Model Mapper
-        self.__m_modelMapper:vtk.vtkPolyDataMapper = vtkPolyDataMapper()
+        self.__m_modelMapper:vtk.vtkPolyDataMapper = vtk.vtkPolyDataMapper()
         self.__m_modelMapper.SetInputConnection(self.__m_modelFilterTranslate.GetOutputPort())
         self.__m_modelMapper.ScalarVisibilityOff()
 
@@ -52,7 +53,7 @@ class Model(QObject):
         self.__m_modelActor.SetPosition(0.0, 0.0, 0.0)
 
     def getModelActor(self) -> vtk.vtkActor:
-        return m_modelActor
+        return self.__m_modelActor
 
 
     def getPositionX(self) -> float:
