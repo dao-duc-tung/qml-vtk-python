@@ -48,7 +48,7 @@ class CanvasHandler(QObject):
         # # #* Give the vtkFboItem reference to the CanvasHandler
         if (self.__m_vtkFboItem):
             qDebug('CanvasHandler::CanvasHandler: setting vtkFboItem to CanvasHandler')
-            # self.__m_vtkFboItem.setProcessingEngine(self.__m_processingEngine)
+            self.__m_vtkFboItem.setProcessingEngine(self.__m_processingEngine)
 
             self.__m_vtkFboItem.rendererInitialized.connect(self.startApplication)
             self.__m_vtkFboItem.isModelSelectedChanged.connect(self.isModelSelectedChanged)

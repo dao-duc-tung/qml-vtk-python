@@ -71,10 +71,6 @@ class SquircleRenderer(QObject):
         self.__m_moveEvent:QMouseEvent = None
         # self.__m_wheelEvent:QWheelEvent = None
 
-        self.__m_mouseLeftButtonAccepted:bool = False
-        self.__m_mouseEventAccepted:bool = False
-        self.__m_moveEventAccepted:bool = False
-
         self.__m_platformModel:vtk.vtkCubeSource = None
         self.__m_platformGrid:vtk.vtkPolyData = None
         self.__m_platformModelActor:vtk.vtkActor = None
@@ -149,22 +145,17 @@ class SquircleRenderer(QObject):
             self.__m_vtkRenderWindow.SetSize(int(self.__m_vtkFboItem.width()), int(self.__m_vtkFboItem.height()))
 
         #* Copy mouse events
-        #! CANNOT CLONE MOUSE EVENTS => MUST REFER TO THE ORIGINAL MOUSE EVENT OBJECT
-        #! AND CREATE A PROPERTY TO CONTROL THE "ACCEPTED" STATUS OF MOUSE EVENT
-        if not self.__m_vtkFboItem.getLastMouseLeftButton().isAccepted():
+        if not self.__m_vtkFboItem.getLastMouseLeftButton(clone=False).isAccepted():
             self.__m_mouseLeftButton = self.__m_vtkFboItem.getLastMouseLeftButton()
-            self.__m_mouseLeftButtonAccepted = False
-            self.__m_vtkFboItem.getLastMouseLeftButton().accept()
+            self.__m_vtkFboItem.getLastMouseLeftButton(clone=False).accept()
 
-        if not self.__m_vtkFboItem.getLastMouseButton().isAccepted():
+        if not self.__m_vtkFboItem.getLastMouseButton(clone=False).isAccepted():
             self.__m_mouseEvent = self.__m_vtkFboItem.getLastMouseButton()
-            self.__m_mouseEventAccepted = False
-            self.__m_vtkFboItem.getLastMouseButton().accept()
+            self.__m_vtkFboItem.getLastMouseButton(clone=False).accept()
 
-        if not self.__m_vtkFboItem.getLastMoveEvent().isAccepted():
+        if not self.__m_vtkFboItem.getLastMoveEvent(clone=False).isAccepted():
             self.__m_moveEvent = self.__m_vtkFboItem.getLastMoveEvent()
-            self.__m_moveEventAccepted = False
-            self.__m_vtkFboItem.getLastMoveEvent().accept()
+            self.__m_vtkFboItem.getLastMoveEvent(clone=False).accept()
 
         # if not self.__m_vtkFboItem.getLastWheelEvent().isAccepted():
         #     self.__m_wheelEvent = self.__m_vtkFboItem.getLastWheelEvent()
@@ -188,8 +179,7 @@ class SquircleRenderer(QObject):
         #* Process camera related commands
 
         #* Process mouse event
-        # if self.__m_mouseEvent and not self.__m_mouseEvent.isAccepted():
-        if self.__m_mouseEvent and not self.__m_mouseEventAccepted:
+        if self.__m_mouseEvent and not self.__m_mouseEvent.isAccepted():
             self.__m_vtkRenderWindowInteractor.SetEventInformationFlipY(
                 self.__m_mouseEvent.x(),
                 self.__m_mouseEvent.y(),
@@ -200,16 +190,14 @@ class SquircleRenderer(QObject):
             )
 
             if self.__m_mouseEvent.type() == QEvent.MouseButtonPress:
-                self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.LeftButtonPressEvent, self.__m_mouseEvent)
+                self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.LeftButtonPressEvent)
             elif self.__m_mouseEvent.type() == QEvent.MouseButtonRelease:
-                self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.LeftButtonReleaseEvent, self.__m_mouseEvent)
+                self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.LeftButtonReleaseEvent)
 
             self.__m_mouseEvent.accept()
-            self.__m_mouseEventAccepted = True
 
         #* Process move event
-        # if self.__m_moveEvent and not self.__m_moveEvent.isAccepted():
-        if self.__m_moveEvent and not self.__m_moveEventAccepted:
+        if self.__m_moveEvent and not self.__m_moveEvent.isAccepted():
             if self.__m_moveEvent.type() == QEvent.MouseMove and self.__m_moveEvent.buttons() & Qt.RightButton:
                 self.__m_vtkRenderWindowInteractor.SetEventInformationFlipY(
                     self.__m_moveEvent.x(),
@@ -220,10 +208,9 @@ class SquircleRenderer(QObject):
                     1 if self.__m_moveEvent.type() == QEvent.MouseButtonDblClick else 0
                 )
 
-                self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.MouseMoveEvent, self.__m_moveEvent)
+                self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.MouseMoveEvent)
 
             self.__m_moveEvent.accept()
-            self.__m_moveEventAccepted = True
 
         # #* Process wheel event
         # if self.__m_wheelEvent and not self.__m_wheelEvent.isAccepted():
@@ -237,11 +224,9 @@ class SquircleRenderer(QObject):
         #* Process model related commands
 
         #* Select model
-        # if self.__m_mouseLeftButton and not self.__m_mouseLeftButton.isAccepted():
-        if self.__m_mouseLeftButton and not self.__m_mouseLeftButtonAccepted:
+        if self.__m_mouseLeftButton and not self.__m_mouseLeftButton.isAccepted():
             self.__selectModel(self.__m_mouseLeftButton.x(), self.__m_mouseLeftButton.y())
             self.__m_mouseLeftButton.accept()
-            self.__m_mouseLeftButtonAccepted = True
 
         #* Model transformations
 
@@ -317,26 +302,25 @@ class SquircleRenderer(QObject):
         g1 = 170.0 / 255.0
         b1 = 170.0 / 255.0
 
-        self.__m_renderer.SetBackground(255,255,255)
-        # self.__m_renderer.SetBackground(r2, g2, b2)
-        # self.__m_renderer.SetBackground2(r1, g1, b1)
+        self.__m_renderer.SetBackground(r2, g2, b2)
+        self.__m_renderer.SetBackground2(r1, g1, b1)
         self.__m_renderer.GradientBackgroundOn()
 
         # #* Axes
-        # axes = vtk.vtkAxesActor()
-        # axes_length = 20.0
-        # axes_label_font_size = np.int16(20)
-        # axes.SetTotalLength(axes_length, axes_length, axes_length)
-        # axes.GetXAxisCaptionActor2D().GetTextActor().SetTextScaleModeToNone()
-        # axes.GetYAxisCaptionActor2D().GetTextActor().SetTextScaleModeToNone()
-        # axes.GetZAxisCaptionActor2D().GetTextActor().SetTextScaleModeToNone()
-        # axes.GetXAxisCaptionActor2D().GetCaptionTextProperty().SetFontSize(axes_label_font_size)
-        # axes.GetYAxisCaptionActor2D().GetCaptionTextProperty().SetFontSize(axes_label_font_size)
-        # axes.GetZAxisCaptionActor2D().GetCaptionTextProperty().SetFontSize(axes_label_font_size)
-        # self.__m_renderer.AddActor(axes)
+        axes = vtk.vtkAxesActor()
+        axes_length = 20.0
+        axes_label_font_size = np.int16(20)
+        axes.SetTotalLength(axes_length, axes_length, axes_length)
+        axes.GetXAxisCaptionActor2D().GetTextActor().SetTextScaleModeToNone()
+        axes.GetYAxisCaptionActor2D().GetTextActor().SetTextScaleModeToNone()
+        axes.GetZAxisCaptionActor2D().GetTextActor().SetTextScaleModeToNone()
+        axes.GetXAxisCaptionActor2D().GetCaptionTextProperty().SetFontSize(axes_label_font_size)
+        axes.GetYAxisCaptionActor2D().GetCaptionTextProperty().SetFontSize(axes_label_font_size)
+        axes.GetZAxisCaptionActor2D().GetCaptionTextProperty().SetFontSize(axes_label_font_size)
+        self.__m_renderer.AddActor(axes)
 
         # #* Platform
-        # self.__generatePlatform()
+        self.__generatePlatform()
 
         #* Initial camera position
         self.resetCamera()

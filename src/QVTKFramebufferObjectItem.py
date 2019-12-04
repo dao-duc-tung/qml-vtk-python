@@ -24,7 +24,7 @@ class Squircle(QQuickFramebufferObject):
         logging.debug('Squircle::__init__')
         super().__init__()
         self.__m_vtkFboRenderer = None
-        self.__m_processingEngine:ProcessingEngine = ProcessingEngine()
+        self.__m_processingEngine:ProcessingEngine = None
 
         self.__m_commandsQueue:queue.Queue = queue.Queue() # CommandModel
         self.__m_commandsQueueMutex = threading.Lock()
@@ -129,33 +129,42 @@ class Squircle(QQuickFramebufferObject):
 
     def mousePressEvent(self, e:QMouseEvent):
         if e.buttons() & Qt.RightButton:
-            self.__m_lastMouseButton = e
+            self.__m_lastMouseButton = self.__cloneMouseEvent(e)
             self.__m_lastMouseButton.ignore()
             e.accept()
             self.update()
 
     def mouseReleaseEvent(self, e:QMouseEvent):
-        self.__m_lastMouseButton = e
+        self.__m_lastMouseButton = self.__cloneMouseEvent(e)
         self.__m_lastMouseButton.ignore()
         e.accept()
         self.update()
 
     def mouseMoveEvent(self, e:QMouseEvent):
         if e.buttons() & Qt.RightButton:
-            self.__m_lastMouseMove = e
+            self.__m_lastMouseMove = self.__cloneMouseEvent(e)
             self.__m_lastMouseMove.ignore()
             e.accept()
             self.update()
 
 
-    def getLastMouseLeftButton(self) -> QMouseEvent:
-        return self.__m_lastMouseLeftButton
+    def getLastMouseLeftButton(self, clone=True) -> QMouseEvent:
+        if clone:
+            return self.__cloneMouseEvent(self.__m_lastMouseLeftButton)
+        else:
+            return self.__m_lastMouseLeftButton
 
-    def getLastMouseButton(self) -> QMouseEvent:
-        return self.__m_lastMouseButton
+    def getLastMouseButton(self, clone=True) -> QMouseEvent:
+        if clone:
+            return self.__cloneMouseEvent(self.__m_lastMouseButton)
+        else:
+            return self.__m_lastMouseButton
 
-    def getLastMoveEvent(self) -> QMouseEvent:
-        return self.__m_lastMouseMove
+    def getLastMoveEvent(self, clone=True) -> QMouseEvent:
+        if clone:
+            return self.__cloneMouseEvent(self.__m_lastMouseMove)
+        else:
+            return self.__m_lastMouseMove
 
     # def getLastWheelEvent(self) -> QWheelEvent:
     #     return self.__m_lastMouseWheel
@@ -227,3 +236,13 @@ class Squircle(QQuickFramebufferObject):
 
     def unlockCommandsQueueMutex(self):
         self.__m_commandsQueueMutex.release()
+
+    def __cloneMouseEvent(self, e:QMouseEvent):
+        event_type = e.type()
+        local_pos = e.localPos()
+        button = e.button()
+        buttons = e.buttons()
+        modifiers = e.modifiers()
+        clone = QMouseEvent(event_type, local_pos, button, buttons, modifiers)
+        clone.ignore()
+        return clone
