@@ -26,34 +26,31 @@ fmt.setStencilBufferSize(0)
 fmt.setStereo(True)
 fmt.setSamples(0) # we never need multisampling in the context since the FBO can support multisamples independently
 
-class SquircleInFboRenderer(QQuickFramebufferObject.Renderer):
+class FboRenderer(QQuickFramebufferObject.Renderer):
     def __init__(self):
         super().__init__()
 
-        self.squircle = SquircleRenderer()
+        self.renderer = RendererHelper()
         self.__fbo = None
-        # self.squircle.initialize()
-        # self.update()
 
     def render( self ):
-        self.squircle.render()
-        # self.update()
+        self.renderer.render()
 
     def synchronize(self, item:QQuickFramebufferObject):
-        self.squircle.synchronize(item)
+        self.renderer.synchronize(item)
 
-    # def createFramebufferObject( self, size ):
-    #     self.__fbo = self.squircle.createFramebufferObject( size )
-    #     return self.__fbo
+    def createFramebufferObject( self, size ):
+        self.__fbo = self.renderer.createFramebufferObject( size )
+        return self.__fbo
 
-# class SquircleRenderer(QObject, QQuickFramebufferObject.Renderer, QOpenGLFunctions):
-class SquircleRenderer(QObject):
+# class RendererHelper(QObject, QQuickFramebufferObject.Renderer, QOpenGLFunctions):
+class RendererHelper(QObject):
     isModelSelectedChanged = Signal(bool)
     selectedModelPositionXChanged = Signal(float)
     selectedModelPositionYChanged = Signal(float)
 
     def __init__(self):
-        qDebug('SquircleRenderer::__init__()')
+        qDebug('RendererHelper::__init__()')
         super().__init__()
         self.__m_vtkFboItem = None
         self.gl = QOpenGLFunctions()
@@ -121,23 +118,23 @@ class SquircleRenderer(QObject):
         self.__m_picker:vtk.vtkCellPicker = vtk.vtkCellPicker()
         self.__m_picker.SetTolerance(0.0)
 
-    def setVtkSquircle(self, vtkFboItem):
-        qDebug('SquircleRenderer::setVtkFboItem()')
+    def setVtkFboItem(self, vtkFboItem):
+        qDebug('RendererHelper::setVtkFboItem()')
         self.__m_vtkFboItem = vtkFboItem
 
     def setProcessingEngine(self, processingEngine:ProcessingEngine):
-        qDebug('SquircleRenderer::setProcessingEngine()')
+        qDebug('RendererHelper::setProcessingEngine()')
         self.__m_processingEngine = processingEngine
 
     def synchronize(self, item:QQuickFramebufferObject):
-        # qDebug('SquircleRenderer::synchronize()')
+        # qDebug('RendererHelper::synchronize()')
         #* the first synchronize
         # if not self.__m_vtkFboItem:
         #     from QVTKFramebufferObjectItem import QVTKFramebufferObjectItem
         #     self.__m_vtkFboItem = (QVTKFramebufferObjectItem)(item)
 
         # if not self.__m_vtkFboItem.isInitialized():
-        #     self.__m_vtkFboItem.setVtkSquircleRenderer(self)
+        #     self.__m_vtkFboItem.setVtkRendererHelper(self)
         #     self.__m_vtkFboItem.rendererInitialized.emit()
 
         rendererSize = self.__m_vtkRenderWindow.GetSize()
@@ -266,7 +263,7 @@ class SquircleRenderer(QObject):
         self.gl.glUseProgram(0)
 
     def createFramebufferObject(self, size:QSize) -> QOpenGLFramebufferObject:
-        qDebug('SquircleRenderer::createFramebufferObject()')
+        qDebug('RendererHelper::createFramebufferObject()')
         macSize = QSize(size.width() / 2, size.height() / 2)
 
         format = QOpenGLFramebufferObjectFormat()
@@ -288,7 +285,7 @@ class SquircleRenderer(QObject):
         return framebufferObject
 
     def initScene(self):
-        qDebug('SquircleRenderer::initScene()')
+        qDebug('RendererHelper::initScene()')
 
         self.__m_vtkRenderWindow.SetOffScreenRendering(True)
 
@@ -326,7 +323,7 @@ class SquircleRenderer(QObject):
         self.resetCamera()
 
     def __generatePlatform(self):
-        qDebug('SquircleRenderer::__generatePlatform()')
+        qDebug('RendererHelper::__generatePlatform()')
 
         #* Platform Model
         platformModelMapper = vtk.vtkPolyDataMapper()
@@ -362,7 +359,7 @@ class SquircleRenderer(QObject):
         self.__updatePlatform()
 
     def __updatePlatform(self):
-        qDebug('SquircleRenderer::__updatePlatform()')
+        qDebug('RendererHelper::__updatePlatform()')
 
         #* Platform Model
 
@@ -403,10 +400,10 @@ class SquircleRenderer(QObject):
 
     def addModelActor(self, model:Model):
         self.__m_renderer.AddActor(model.getModelActor())
-        # qDebug(f'SquircleRenderer::addModelActor(): Model added {model}')
+        # qDebug(f'RendererHelper::addModelActor(): Model added {model}')
 
     def __selectModel(self, x:np.int16, y:np.int16):
-        qDebug('SquircleRenderer::__selectModel()')
+        qDebug('RendererHelper::__selectModel()')
 
         #*  the y-axis flip for the pickin:
         self.__m_picker.Pick(x, self.__m_renderer.GetSize()[1] - y, 0, self.__m_renderer)
@@ -432,7 +429,7 @@ class SquircleRenderer(QObject):
         self.__m_selectedModel = self.__getSelectedModelNoLock()
 
         if self.__m_selectedActor:
-            # qDebug(f'SquircleRenderer::__selectModel(): picked actor {self.__m_selectedActor}')
+            # qDebug(f'RendererHelper::__selectModel(): picked actor {self.__m_selectedActor}')
 
             self.__m_selectedModel.setSelected(True)
 
@@ -450,7 +447,7 @@ class SquircleRenderer(QObject):
         else:
             self.__setIsModelSelected(False)
 
-        qDebug('SquircleRenderer::__selectModel() end')
+        qDebug('RendererHelper::__selectModel() end')
 
     def __clearSelectedModel(self):
         self.__m_selectedModel.setSelected(False)
@@ -463,7 +460,7 @@ class SquircleRenderer(QObject):
 
     def __setIsModelSelected(self, isModelSelected:bool):
         if self.__m_isModelSelected != isModelSelected:
-            qDebug(f'SquircleRenderer::__setIsModelSelected(): {isModelSelected}')
+            qDebug(f'RendererHelper::__setIsModelSelected(): {isModelSelected}')
             self.__m_isModelSelected = isModelSelected
             self.isModelSelectedChanged.emit(isModelSelected)
 

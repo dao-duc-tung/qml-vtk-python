@@ -2,7 +2,7 @@ from PySide2.QtCore import QObject, QUrl, qDebug, qCritical, Signal, Property, S
 from PySide2.QtQml import QQmlApplicationEngine, qmlRegisterType, QQmlEngine
 from PySide2.QtWidgets import QApplication
 
-from QVTKFramebufferObjectItem import Squircle
+from QVTKFramebufferObjectItem import FboItem
 from CommandModelTranslate import TranslateParams_t
 from ProcessingEngine import ProcessingEngine
 
@@ -29,7 +29,7 @@ class CanvasHandler(QObject):
         app.setApplicationName('QtVTK-Py')
 
         #* Register QML Types
-        qmlRegisterType(Squircle, 'QtVTK', 1, 0, 'VtkFboItem')
+        qmlRegisterType(FboItem, 'QtVTK', 1, 0, 'VtkFboItem')
 
         # #* Create classes instances
         self.__m_processingEngine = ProcessingEngine()
@@ -43,7 +43,7 @@ class CanvasHandler(QObject):
 
         # #* Get reference to the QVTKFramebufferObjectItem in QML
         rootObject = engine.rootObjects()[0] # returns QObject
-        self.__m_vtkFboItem = rootObject.findChild(Squircle, 'vtkFboItem')
+        self.__m_vtkFboItem = rootObject.findChild(FboItem, 'vtkFboItem')
 
         # # #* Give the vtkFboItem reference to the CanvasHandler
         if (self.__m_vtkFboItem):

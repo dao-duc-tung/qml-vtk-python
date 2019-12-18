@@ -6,12 +6,12 @@ from CommandModelAdd import CommandModel
 from CommandModelAdd import CommandModelAdd
 from CommandModelTranslate import CommandModelTranslate, TranslateParams_t
 from ProcessingEngine import ProcessingEngine
-from QVTKFramebufferObjectRenderer import SquircleInFboRenderer
+from QVTKFramebufferObjectRenderer import FboRenderer
 import queue
 import threading
 import logging
 
-class Squircle(QQuickFramebufferObject):
+class FboItem(QQuickFramebufferObject):
     rendererInitialized = Signal()
     isModelSelectedChanged = Signal(bool)
     selectedModelPositionXChanged = Signal(float)
@@ -21,7 +21,7 @@ class Squircle(QQuickFramebufferObject):
     addModelFromFileError = Signal(str)
 
     def __init__(self):
-        logging.debug('Squircle::__init__')
+        logging.debug('FboItem::__init__')
         super().__init__()
         self.__m_vtkFboRenderer = None
         self.__m_processingEngine:ProcessingEngine = None
@@ -46,21 +46,21 @@ class Squircle(QQuickFramebufferObject):
         self.setAcceptedMouseButtons(Qt.RightButton)
 
     def createRenderer(self):
-        logging.debug('Squircle::createRenderer')
-        self.setVtkFboRenderer(SquircleInFboRenderer())
+        logging.debug('FboItem::createRenderer')
+        self.setVtkFboRenderer(FboRenderer())
         return self.__m_vtkFboRenderer
 
     def setVtkFboRenderer(self, renderer):
-        logging.debug('Squircle::setVtkFboRenderer')
+        logging.debug('FboItem::setVtkFboRenderer')
 
         self.__m_vtkFboRenderer = renderer
-        self.__m_vtkFboRenderer.squircle.setVtkSquircle(self)
+        self.__m_vtkFboRenderer.renderer.setVtkFboItem(self)
 
-        self.__m_vtkFboRenderer.squircle.isModelSelectedChanged.connect(self.isModelSelectedChanged)
-        self.__m_vtkFboRenderer.squircle.selectedModelPositionXChanged.connect(self.selectedModelPositionXChanged)
-        self.__m_vtkFboRenderer.squircle.selectedModelPositionYChanged.connect(self.selectedModelPositionYChanged)
+        self.__m_vtkFboRenderer.renderer.isModelSelectedChanged.connect(self.isModelSelectedChanged)
+        self.__m_vtkFboRenderer.renderer.selectedModelPositionXChanged.connect(self.selectedModelPositionXChanged)
+        self.__m_vtkFboRenderer.renderer.selectedModelPositionYChanged.connect(self.selectedModelPositionYChanged)
 
-        self.__m_vtkFboRenderer.squircle.setProcessingEngine(self.__m_processingEngine)
+        self.__m_vtkFboRenderer.renderer.setProcessingEngine(self.__m_processingEngine)
         self.rendererInitialized.emit()
 
     def isInitialized(self) -> bool:
@@ -72,13 +72,13 @@ class Squircle(QQuickFramebufferObject):
     # #* Model releated functions
 
     def isModelSelected(self) -> bool:
-        return self.__m_vtkFboRenderer.squircle.isModelSelected()
+        return self.__m_vtkFboRenderer.renderer.isModelSelected()
 
     def getSelectedModelPositionX(self) -> float:
-        return self.__m_vtkFboRenderer.squircle.getSelectedModelPositionX()
+        return self.__m_vtkFboRenderer.renderer.getSelectedModelPositionX()
 
     def getSelectedModelPositionY(self) -> float:
-        return self.__m_vtkFboRenderer.squircle.getSelectedModelPositionY()
+        return self.__m_vtkFboRenderer.renderer.getSelectedModelPositionY()
 
     def selectModel(self, screenX:int, screenY:int):
         self.__m_lastMouseLeftButton = QMouseEvent(QEvent.Type.None_, QPointF(screenX, screenY), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
@@ -91,7 +91,7 @@ class Squircle(QQuickFramebufferObject):
         self.update()
 
     def addModelFromFile(self, modelPath):
-        qDebug('Squircle::addModelFromFile')
+        qDebug('FboItem::addModelFromFile')
 
         command = CommandModelAdd(self.__m_vtkFboRenderer, self.__m_processingEngine, modelPath)
 
@@ -104,7 +104,7 @@ class Squircle(QQuickFramebufferObject):
     def translateModel(self, translateData:TranslateParams_t, inTransition:bool):
         if translateData.model == None:
             #* If no model selected yet, try to select one
-            translateData.model = self.__m_vtkFboRenderer.squircle.getSelectedModel()
+            translateData.model = self.__m_vtkFboRenderer.renderer.getSelectedModel()
 
             if translateData.model == None:
                 return
@@ -171,7 +171,7 @@ class Squircle(QQuickFramebufferObject):
 
 
     def resetCamera(self):
-        self.__m_vtkFboRenderer.squircle.resetCamera()
+        self.__m_vtkFboRenderer.renderer.resetCamera()
         self.update()
 
     def getModelsRepresentation(self) -> int:
