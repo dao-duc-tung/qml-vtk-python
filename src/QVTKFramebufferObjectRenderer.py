@@ -300,6 +300,8 @@ class RendererHelper(QObject):
         axes_length = 20.0
         axes_label_font_size = np.int16(20)
         axes.SetTotalLength(axes_length, axes_length, axes_length)
+        axes.SetCylinderRadius(0.02)
+        axes.SetShaftTypeToCylinder()
         axes.GetXAxisCaptionActor2D().GetTextActor().SetTextScaleModeToNone()
         axes.GetYAxisCaptionActor2D().GetTextActor().SetTextScaleModeToNone()
         axes.GetZAxisCaptionActor2D().GetTextActor().SetTextScaleModeToNone()
