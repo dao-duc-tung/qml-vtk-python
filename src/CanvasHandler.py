@@ -1,6 +1,7 @@
 from PySide2.QtCore import QObject, QUrl, qDebug, qCritical, Signal, Property, Slot
 from PySide2.QtQml import QQmlApplicationEngine, qmlRegisterType, QQmlEngine
 from PySide2.QtWidgets import QApplication
+from PySide2.QtGui import QSurfaceFormat
 
 from QVTKFramebufferObjectItem import FboItem
 from CommandModelTranslate import TranslateParams_t
@@ -21,6 +22,8 @@ class CanvasHandler(QObject):
         self.__m_vtkFboItem = None
         #* Set style: https://stackoverflow.com/questions/43093797/PySide2-quickcontrols-material-style
         sys_argv += ['--style', 'material'] #! MUST HAVE
+
+        QSurfaceFormat.setDefaultFormat(FboItem.defaultSurfaceFormat(False))
         app = QApplication(sys_argv)
 
         engine = QQmlApplicationEngine()
@@ -39,7 +42,7 @@ class CanvasHandler(QObject):
         ctxt.setContextProperty('canvasHandler', self)
 
         # #* Load main QML file
-        engine.load(QUrl.fromLocalFile('resources\\main.qml'))
+        engine.load(QUrl.fromLocalFile('resources/main.qml'))
 
         # #* Get reference to the QVTKFramebufferObjectItem in QML
         rootObject = engine.rootObjects()[0] # returns QObject

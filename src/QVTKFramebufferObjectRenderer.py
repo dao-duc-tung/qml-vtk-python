@@ -11,21 +11,6 @@ import logging
 from OpenGL import GL
 
 
-#* https://github.com/Kitware/VTK/blob/master/GUISupport/Qt/QVTKOpenGLNativeWidget.cxx
-fmt = QSurfaceFormat()
-fmt.setRenderableType(QSurfaceFormat.OpenGL)
-fmt.setVersion(3, 2)
-fmt.setProfile(QSurfaceFormat.CoreProfile)
-fmt.setSwapBehavior(QSurfaceFormat.DoubleBuffer)
-fmt.setRedBufferSize(8)
-fmt.setGreenBufferSize(8)
-fmt.setBlueBufferSize(8)
-fmt.setDepthBufferSize(8)
-fmt.setAlphaBufferSize(8)
-fmt.setStencilBufferSize(0)
-fmt.setStereo(True)
-fmt.setSamples(0) # we never need multisampling in the context since the FBO can support multisamples independently
-
 class FboRenderer(QQuickFramebufferObject.Renderer):
     def __init__(self):
         super().__init__()
