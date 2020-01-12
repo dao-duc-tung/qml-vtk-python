@@ -25,21 +25,24 @@ ApplicationWindow {
             anchors.fill: parent
 
             MouseArea {
-                acceptedButtons: Qt.LeftButton
+                acceptedButtons: Qt.AllButtons
                 anchors.fill: parent
 
-                onPositionChanged: {
+                onPositionChanged: (mouse) => {
                     canvasHandler.mouseMoveEvent(pressedButtons, mouseX, mouseY);
+                    mouse.accepted = false
                 }
-                onPressed: {
+                onPressed: (mouse) => {
                     canvasHandler.mousePressEvent(pressedButtons, mouseX, mouseY);
                     // if u want to propagate the pressed event
                     // so the VtkFboItem instance can receive it
                     // then uncomment the belowed line
                     // mouse.ignore() // or mouse.accepted = false
+                    mouse.accepted = false
                 }
-                onReleased: {
+                onReleased: (mouse) => {
                     canvasHandler.mouseReleaseEvent(pressedButtons, mouseX, mouseY);
+                    mouse.accepted = false
                 }
             }
         }

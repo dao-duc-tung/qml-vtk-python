@@ -159,7 +159,7 @@ class RendererHelper(QObject):
             self.__m_firstRender = False
 
         #* Process camera related commands
-
+        
         #* Process mouse event
         if self.__m_mouseEvent and not self.__m_mouseEvent.isAccepted():
             self.__m_vtkRenderWindowInteractor.SetEventInformationFlipY(
@@ -180,7 +180,7 @@ class RendererHelper(QObject):
 
         #* Process move event
         if self.__m_moveEvent and not self.__m_moveEvent.isAccepted():
-            if self.__m_moveEvent.type() == QEvent.MouseMove and self.__m_moveEvent.buttons() & Qt.RightButton:
+            if self.__m_moveEvent.type() == QEvent.MouseMove and self.__m_moveEvent.buttons():
                 self.__m_vtkRenderWindowInteractor.SetEventInformationFlipY(
                     self.__m_moveEvent.x(),
                     self.__m_moveEvent.y(),

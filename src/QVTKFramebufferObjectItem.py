@@ -43,7 +43,7 @@ class FboItem(QQuickFramebufferObject):
         # self.__m_lastMouseWheel:QWheelEvent = QWheelEvent(QPointF(0,0), QPointF(0,0), QPoint(0,0), QPoint(0,0), 0, Qt.Vertical, Qt.NoButton, Qt.NoModifier)
 
         self.setMirrorVertically(True) # QtQuick and OpenGL have opposite Y-Axis directions
-        self.setAcceptedMouseButtons(Qt.RightButton)
+        self.setAcceptedMouseButtons(Qt.AllButtons)
 
     def createRenderer(self):
         logging.debug('FboItem::createRenderer')
@@ -128,7 +128,6 @@ class FboItem(QQuickFramebufferObject):
     #     self.update()
 
     def mousePressEvent(self, e:QMouseEvent):
-        if e.buttons() & Qt.RightButton:
             self.__m_lastMouseButton = self.__cloneMouseEvent(e)
             self.__m_lastMouseButton.ignore()
             e.accept()
@@ -141,11 +140,10 @@ class FboItem(QQuickFramebufferObject):
         self.update()
 
     def mouseMoveEvent(self, e:QMouseEvent):
-        if e.buttons() & Qt.RightButton:
-            self.__m_lastMouseMove = self.__cloneMouseEvent(e)
-            self.__m_lastMouseMove.ignore()
-            e.accept()
-            self.update()
+        self.__m_lastMouseMove = self.__cloneMouseEvent(e)
+        self.__m_lastMouseMove.ignore()
+        e.accept()
+        self.update()
 
 
     def getLastMouseLeftButton(self, clone=True) -> QMouseEvent:
