@@ -39,8 +39,7 @@ class FboItem(QQuickFramebufferObject):
         self.__m_lastMouseLeftButton:QMouseEvent = QMouseEvent(QEvent.Type.None_, QPointF(0,0), Qt.NoButton, Qt.NoButton, Qt.NoModifier)
         self.__m_lastMouseButton:QMouseEvent = QMouseEvent(QEvent.Type.None_, QPointF(0,0), Qt.NoButton, Qt.NoButton, Qt.NoModifier)
         self.__m_lastMouseMove:QMouseEvent = QMouseEvent(QEvent.Type.None_, QPointF(0,0), Qt.NoButton, Qt.NoButton, Qt.NoModifier)
-        # self.__m_lastMouseWheel:QWheelEvent = QWheelEvent(QPointF(0,0), 0, Qt.NoButton, Qt.NoModifier, Qt.Vertical)
-        # self.__m_lastMouseWheel:QWheelEvent = QWheelEvent(QPointF(0,0), QPointF(0,0), QPoint(0,0), QPoint(0,0), 0, Qt.Vertical, Qt.NoButton, Qt.NoModifier)
+        self.__m_lastMouseWheel:QWheelEvent = None 
 
         self.setMirrorVertically(True) # QtQuick and OpenGL have opposite Y-Axis directions
         self.setAcceptedMouseButtons(Qt.AllButtons)
@@ -121,11 +120,11 @@ class FboItem(QQuickFramebufferObject):
 
     # #* Camera related functions
 
-    # def wheelEvent(self, e:QWheelEvent):
-    #     self.__m_lastMouseWheel = QWheelEvent(e)
-    #     self.__m_lastMouseWheel.ignore()
-    #     e.accept()
-    #     self.update()
+    def wheelEvent(self, e:QWheelEvent):
+        self.__m_lastMouseWheel = self.__cloneMouseWheelEvent(e)
+        self.__m_lastMouseWheel.ignore()
+        e.accept()
+        self.update()
 
     def mousePressEvent(self, e:QMouseEvent):
             self.__m_lastMouseButton = self.__cloneMouseEvent(e)
@@ -164,8 +163,8 @@ class FboItem(QQuickFramebufferObject):
         else:
             return self.__m_lastMouseMove
 
-    # def getLastWheelEvent(self) -> QWheelEvent:
-    #     return self.__m_lastMouseWheel
+    def getLastWheelEvent(self) -> QWheelEvent:
+        return self.__m_lastMouseWheel
 
 
     def resetCamera(self):
@@ -243,6 +242,20 @@ class FboItem(QQuickFramebufferObject):
         modifiers = e.modifiers()
         clone = QMouseEvent(event_type, local_pos, button, buttons, modifiers)
         clone.ignore()
+        return clone
+
+    def __cloneMouseWheelEvent(self, e:QWheelEvent):
+        pos = e.pos()
+        globalPos = e.globalPos() 
+        pixelDelta = e.pixelDelta() 
+        angleDelta = e.angleDelta()
+        buttons = e.buttons()
+        modifiers = e.modifiers()
+        phase = e.phase()
+        inverted = e.inverted()
+        clone = QWheelEvent(pos, globalPos, pixelDelta, angleDelta, buttons, modifiers, phase, inverted)
+        clone.ignore()
+        clone.accepted = False
         return clone
 
     def defaultSurfaceFormat(stereo_capable):

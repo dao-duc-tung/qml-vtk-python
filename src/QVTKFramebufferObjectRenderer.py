@@ -51,7 +51,7 @@ class RendererHelper(QObject):
         self.__m_mouseLeftButton:QMouseEvent = None
         self.__m_mouseEvent:QMouseEvent = None
         self.__m_moveEvent:QMouseEvent = None
-        # self.__m_wheelEvent:QWheelEvent = None
+        self.__m_wheelEvent:QWheelEvent = None
 
         self.__m_platformModel:vtk.vtkCubeSource = None
         self.__m_platformGrid:vtk.vtkPolyData = None
@@ -139,9 +139,8 @@ class RendererHelper(QObject):
             self.__m_moveEvent = self.__m_vtkFboItem.getLastMoveEvent()
             self.__m_vtkFboItem.getLastMoveEvent(clone=False).accept()
 
-        # if not self.__m_vtkFboItem.getLastWheelEvent().isAccepted():
-        #     self.__m_wheelEvent = self.__m_vtkFboItem.getLastWheelEvent()
-        #     self.__m_vtkFboItem.getLastWheelEvent().accept()
+        if self.__m_vtkFboItem.getLastWheelEvent() and not self.__m_vtkFboItem.getLastWheelEvent().isAccepted():
+            self.__m_wheelEvent = self.__m_vtkFboItem.getLastWheelEvent()
 
         #* Get extra data
         self.__m_modelsRepresentationOption = self.__m_vtkFboItem.getModelsRepresentation()
@@ -194,14 +193,22 @@ class RendererHelper(QObject):
 
             self.__m_moveEvent.accept()
 
-        # #* Process wheel event
-        # if self.__m_wheelEvent and not self.__m_wheelEvent.isAccepted():
-        #     if self.__m_wheelEvent.delta() > 0:
-        #         self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.MouseWheelForwardEvent, self.__m_wheelEvent)
-        #     elif self.__m_wheelEvent.delta() < 0:
-        #         self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.MouseWheelBackwardEvent, self.__m_wheelEvent)
+        #* Process wheel event
+        if self.__m_wheelEvent and not self.__m_wheelEvent.isAccepted():
+            self.__m_vtkRenderWindowInteractor.SetEventInformationFlipY(
+                self.__m_wheelEvent.x(), self.__m_wheelEvent.y(),
+                1 if (self.__m_wheelEvent.modifiers() & Qt.ControlModifier) > 0 else 0,
+                1 if (self.__m_wheelEvent.modifiers() & Qt.ShiftModifier) > 0 else 0,
+                '0',
+                1 if self.__m_wheelEvent.type() == QEvent.MouseButtonDblClick else 0
+            )
 
-        #     self.__m_wheelEvent.accept()
+            if self.__m_wheelEvent.delta() > 0:
+                self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.MouseWheelForwardEvent)
+            elif self.__m_wheelEvent.delta() < 0:
+                self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.MouseWheelBackwardEvent)
+
+            self.__m_wheelEvent.accept()
 
         #* Process model related commands
 
