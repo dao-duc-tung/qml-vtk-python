@@ -17,7 +17,7 @@ def main():
 if __name__ == '__main__':
     set_vtk_log()
 
-    from debug import except_hook
+    from src.utils import except_hook
     sys.excepthook = except_hook
 
     main()
