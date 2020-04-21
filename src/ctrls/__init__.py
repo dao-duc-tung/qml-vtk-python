@@ -1,1 +1,1 @@
-from .CanvasHandler import *
+from .mainCtrl import *

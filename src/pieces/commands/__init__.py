@@ -1,1 +1,1 @@
-from .CommandModel import *
+from .cmd import *

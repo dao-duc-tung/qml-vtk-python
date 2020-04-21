@@ -1,0 +1,5 @@
+class ModelName:
+    BASE = "BASE"
+    MESH_A = "MESH_A"
+    CYLINDER_A = "CYLINDER_A"
+    STYLE_TRACKBALL = "STYLE_TRACKBALL"
