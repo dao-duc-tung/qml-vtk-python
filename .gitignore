@@ -5,6 +5,7 @@ tempcron.txt
 .vscode/
 *.ini
 .idea/
+rc_*.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

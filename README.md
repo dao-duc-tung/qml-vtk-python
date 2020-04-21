@@ -1,6 +1,6 @@
 # A python-based project on VTK-QML combination
 
-The source code is based on [Nicanor Romero Venier's project](https://github.com/nicanor-romero/QtVtk)
+The source code is based on [Nicanor Romero Venier's project](https://github.com/nicanor-romero/QmlVtk)
 
 ## Description
 
@@ -21,6 +21,6 @@ Prefix = python-folder/Lib/site-packages/PySide2
 
 ## Example
 
-![Import and view STL files](resources/QtVtk_1.gif "Import and view STL files")
+![Import and view STL files](resources/QmlVtk_1.gif "Import and view STL files")
 
-![Overlay QtQuickControls2 components](resources/QtVtk_2.gif "Overlay QtQuickControls2 components")
+![Overlay QtQuickControls2 components](resources/QmlVtk_2.gif "Overlay QtQuickControls2 components")
