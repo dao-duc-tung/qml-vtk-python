@@ -4,7 +4,9 @@ The source code is based on [Nicanor Romero Venier's project](https://github.com
 
 ## Description
 
-The code was tested using Python 3.6.6, PySide2 >= 5.13.2 and VTK 8.1.1 (built with vtkRenderingExternal module in Release mode), VTK 8.1.2 (built without vtkRenderingExternal module in Debug mode), VTK 8.2.0 (built without vtkRenderingExternal module in Debug mode) in Windows 10.
+The code was tested using Python 3.6.6, PySide2 5.13.2 and VTK 8.1.1 (built with vtkRenderingExternal module in Release mode), VTK 8.1.2 (built without vtkRenderingExternal module in Debug mode), VTK 8.2.0 (built without vtkRenderingExternal module in Debug mode) in Windows 10.
+
+The code was tested using Python 3.6.6, PySide2 5.13.2, VTK 8.1.2 (with vtkRenderingExternal), and Anaconda3 in Ubuntu 16.04.
 
 In [Nicanor's post](https://medium.com/bq-engineering/integrating-qtquickcontrols-2-with-vtk-df54bbb99de3), he claimed that "in order for this code to work you will need to add the vtkRenderingExternal module when compiling VTK". I'm not sure about this module but I also tested this porject with VTK 8.1.2 and VTK 8.2.0 which are built without vtkRenderingExternal module.
 
