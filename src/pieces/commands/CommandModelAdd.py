@@ -5,38 +5,31 @@ from CommandModel import CommandModel
 from Model import Model
 from QVTKFramebufferObjectRenderer import FboRenderer
 
-class CommandModelAddConnection(QObject):
+class CommandModelAdd(QThread, CommandModel):
     ready = Signal()
     done = Signal()
 
-class CommandModelAdd(QThread, CommandModel):
     def __init__(self, vtkFboRenderer:FboRenderer, processingEngine:ProcessingEngine, modelPath:QUrl):
         super().__init__()
-        self.signal_conn = CommandModelAddConnection()
-        self.__m_model:Model = None
-        self.__m_positionX:float = 0.0
-        self.__m_positionY:float = 0.0
-        self.__m_ready:bool = False
+        self.__model:Model = None
+        self.__positionX:float = 0.0
+        self.__positionY:float = 0.0
+        self.__ready:bool = False
 
-        self.__m_processingEngine:ProcessingEngine = processingEngine
-        self.__m_modelPath:QUrl = modelPath
-        self.__m_vtkFboRenderer:FboRenderer = vtkFboRenderer
+        self.__processingEngine:ProcessingEngine = processingEngine
+        self.__modelPath:QUrl = modelPath
+        self.__vtkFboRenderer:FboRenderer = vtkFboRenderer
 
     def run(self):
-        qDebug('CommandModelAdd::run()')
+        self.__model = self.__processingEngine.addModel(self.__modelPath)
+        self.__processingEngine.placeModel(self.__model)
 
-        self.__m_model = self.__m_processingEngine.addModel(self.__m_modelPath)
-        self.__m_processingEngine.placeModel(self.__m_model)
-
-        self.__m_ready = True
-        self.signal_conn.ready.emit()
-
+        self.__ready = True
+        self.ready.emit()
 
     def isReady(self) -> bool:
-        return self.__m_ready
+        return self.__ready
 
     def execute(self):
-        qDebug('CommandModelAdd::execute()')
-
-        self.__m_vtkFboRenderer.renderer.addModelActor(self.__m_model)
-        self.signal_conn.done.emit()
+        self.__vtkFboRenderer.renderer.addModelActor(self.__model)
+        self.done.emit()

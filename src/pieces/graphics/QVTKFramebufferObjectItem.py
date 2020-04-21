@@ -23,24 +23,24 @@ class FboItem(QQuickFramebufferObject):
     def __init__(self):
         logging.debug('FboItem::__init__')
         super().__init__()
-        self.__m_vtkFboRenderer = None
-        self.__m_processingEngine:ProcessingEngine = None
+        self.__vtkFboRenderer = None
+        self.__processingEngine:ProcessingEngine = None
 
-        self.__m_commandsQueue:queue.Queue = queue.Queue() # CommandModel
-        self.__m_commandsQueueMutex = threading.Lock()
+        self.__commandsQueue:queue.Queue = queue.Queue() # CommandModel
+        self.__commandsQueueMutex = threading.Lock()
 
-        self.__m_modelsRepresentationOption:int = 2
-        self.__m_modelsOpacity:float = 1.0
-        self.__m_gouraudInterpolation:bool = False
-        self.__m_modelColorR:int = 3
-        self.__m_modelColorG:int = 169
-        self.__m_modelColorB:int = 244
+        self.__modelsRepresentationOption:int = 2
+        self.__modelsOpacity:float = 1.0
+        self.__gouraudInterpolation:bool = False
+        self.__modelColorR:int = 3
+        self.__modelColorG:int = 169
+        self.__modelColorB:int = 244
 
-        self.__m_lastMouseLeftButton:QMouseEvent = QMouseEvent(QEvent.Type.None_, QPointF(0,0), Qt.NoButton, Qt.NoButton, Qt.NoModifier)
-        self.__m_lastMouseButton:QMouseEvent = QMouseEvent(QEvent.Type.None_, QPointF(0,0), Qt.NoButton, Qt.NoButton, Qt.NoModifier)
-        self.__m_lastMouseMove:QMouseEvent = QMouseEvent(QEvent.Type.None_, QPointF(0,0), Qt.NoButton, Qt.NoButton, Qt.NoModifier)
-        # self.__m_lastMouseWheel:QWheelEvent = QWheelEvent(QPointF(0,0), 0, Qt.NoButton, Qt.NoModifier, Qt.Vertical)
-        # self.__m_lastMouseWheel:QWheelEvent = QWheelEvent(QPointF(0,0), QPointF(0,0), QPoint(0,0), QPoint(0,0), 0, Qt.Vertical, Qt.NoButton, Qt.NoModifier)
+        self.__lastMouseLeftButton:QMouseEvent = QMouseEvent(QEvent.Type.None_, QPointF(0,0), Qt.NoButton, Qt.NoButton, Qt.NoModifier)
+        self.__lastMouseButton:QMouseEvent = QMouseEvent(QEvent.Type.None_, QPointF(0,0), Qt.NoButton, Qt.NoButton, Qt.NoModifier)
+        self.__lastMouseMove:QMouseEvent = QMouseEvent(QEvent.Type.None_, QPointF(0,0), Qt.NoButton, Qt.NoButton, Qt.NoModifier)
+        # self.__lastMouseWheel:QWheelEvent = QWheelEvent(QPointF(0,0), 0, Qt.NoButton, Qt.NoModifier, Qt.Vertical)
+        # self.__lastMouseWheel:QWheelEvent = QWheelEvent(QPointF(0,0), QPointF(0,0), QPoint(0,0), QPoint(0,0), 0, Qt.Vertical, Qt.NoButton, Qt.NoModifier)
 
         self.setMirrorVertically(True) # QtQuick and OpenGL have opposite Y-Axis directions
         self.setAcceptedMouseButtons(Qt.RightButton)
@@ -48,52 +48,52 @@ class FboItem(QQuickFramebufferObject):
     def createRenderer(self):
         logging.debug('FboItem::createRenderer')
         self.setVtkFboRenderer(FboRenderer())
-        return self.__m_vtkFboRenderer
+        return self.__vtkFboRenderer
 
     def setVtkFboRenderer(self, renderer):
         logging.debug('FboItem::setVtkFboRenderer')
 
-        self.__m_vtkFboRenderer = renderer
-        self.__m_vtkFboRenderer.renderer.setVtkFboItem(self)
+        self.__vtkFboRenderer = renderer
+        self.__vtkFboRenderer.renderer.setVtkFboItem(self)
 
-        self.__m_vtkFboRenderer.renderer.isModelSelectedChanged.connect(self.isModelSelectedChanged)
-        self.__m_vtkFboRenderer.renderer.selectedModelPositionXChanged.connect(self.selectedModelPositionXChanged)
-        self.__m_vtkFboRenderer.renderer.selectedModelPositionYChanged.connect(self.selectedModelPositionYChanged)
+        self.__vtkFboRenderer.renderer.isModelSelectedChanged.connect(self.isModelSelectedChanged)
+        self.__vtkFboRenderer.renderer.selectedModelPositionXChanged.connect(self.selectedModelPositionXChanged)
+        self.__vtkFboRenderer.renderer.selectedModelPositionYChanged.connect(self.selectedModelPositionYChanged)
 
-        self.__m_vtkFboRenderer.renderer.setProcessingEngine(self.__m_processingEngine)
+        self.__vtkFboRenderer.renderer.setProcessingEngine(self.__processingEngine)
         self.rendererInitialized.emit()
 
     def isInitialized(self) -> bool:
-        return (self.__m_vtkFboRenderer != None)
+        return (self.__vtkFboRenderer != None)
 
     def setProcessingEngine(self, processingEngine:ProcessingEngine):
-        self.__m_processingEngine = processingEngine
+        self.__processingEngine = processingEngine
 
     # #* Model releated functions
 
     def isModelSelected(self) -> bool:
-        return self.__m_vtkFboRenderer.renderer.isModelSelected()
+        return self.__vtkFboRenderer.renderer.isModelSelected()
 
     def getSelectedModelPositionX(self) -> float:
-        return self.__m_vtkFboRenderer.renderer.getSelectedModelPositionX()
+        return self.__vtkFboRenderer.renderer.getSelectedModelPositionX()
 
     def getSelectedModelPositionY(self) -> float:
-        return self.__m_vtkFboRenderer.renderer.getSelectedModelPositionY()
+        return self.__vtkFboRenderer.renderer.getSelectedModelPositionY()
 
     def selectModel(self, screenX:int, screenY:int):
-        self.__m_lastMouseLeftButton = QMouseEvent(QEvent.Type.None_, QPointF(screenX, screenY), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
-        self.__m_lastMouseLeftButton.ignore()
+        self.__lastMouseLeftButton = QMouseEvent(QEvent.Type.None_, QPointF(screenX, screenY), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
+        self.__lastMouseLeftButton.ignore()
         self.update()
 
     def resetModelSelection(self):
-        self.__m_lastMouseLeftButton = QMouseEvent(QEvent.None_, QPointF(-1, -1), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
-        self.__m_lastMouseLeftButton.ignore()
+        self.__lastMouseLeftButton = QMouseEvent(QEvent.None_, QPointF(-1, -1), Qt.LeftButton, Qt.LeftButton, Qt.NoModifier)
+        self.__lastMouseLeftButton.ignore()
         self.update()
 
     def addModelFromFile(self, modelPath):
         qDebug('FboItem::addModelFromFile')
 
-        command = CommandModelAdd(self.__m_vtkFboRenderer, self.__m_processingEngine, modelPath)
+        command = CommandModelAdd(self.__vtkFboRenderer, self.__processingEngine, modelPath)
 
         command.signal_conn.ready.connect(self.update)
         command.signal_conn.done.connect(self.addModelFromFileDone)
@@ -104,138 +104,138 @@ class FboItem(QQuickFramebufferObject):
     def translateModel(self, translateData:TranslateParams_t, inTransition:bool):
         if translateData.model == None:
             #* If no model selected yet, try to select one
-            translateData.model = self.__m_vtkFboRenderer.renderer.getSelectedModel()
+            translateData.model = self.__vtkFboRenderer.renderer.getSelectedModel()
 
             if translateData.model == None:
                 return
 
-        self.__addCommand(CommandModelTranslate(self.__m_vtkFboRenderer, translateData, inTransition))
+        self.__addCommand(CommandModelTranslate(self.__vtkFboRenderer, translateData, inTransition))
 
 
     def __addCommand(self, command:CommandModel):
-        self.__m_commandsQueueMutex.acquire()
-        self.__m_commandsQueue.put(command)
-        self.__m_commandsQueueMutex.release()
+        self.__commandsQueueMutex.acquire()
+        self.__commandsQueue.put(command)
+        self.__commandsQueueMutex.release()
         self.update()
 
 
     # #* Camera related functions
 
     # def wheelEvent(self, e:QWheelEvent):
-    #     self.__m_lastMouseWheel = QWheelEvent(e)
-    #     self.__m_lastMouseWheel.ignore()
+    #     self.__lastMouseWheel = QWheelEvent(e)
+    #     self.__lastMouseWheel.ignore()
     #     e.accept()
     #     self.update()
 
     def mousePressEvent(self, e:QMouseEvent):
         if e.buttons() & Qt.RightButton:
-            self.__m_lastMouseButton = self.__cloneMouseEvent(e)
-            self.__m_lastMouseButton.ignore()
+            self.__lastMouseButton = self.__cloneMouseEvent(e)
+            self.__lastMouseButton.ignore()
             e.accept()
             self.update()
 
     def mouseReleaseEvent(self, e:QMouseEvent):
-        self.__m_lastMouseButton = self.__cloneMouseEvent(e)
-        self.__m_lastMouseButton.ignore()
+        self.__lastMouseButton = self.__cloneMouseEvent(e)
+        self.__lastMouseButton.ignore()
         e.accept()
         self.update()
 
     def mouseMoveEvent(self, e:QMouseEvent):
         if e.buttons() & Qt.RightButton:
-            self.__m_lastMouseMove = self.__cloneMouseEvent(e)
-            self.__m_lastMouseMove.ignore()
+            self.__lastMouseMove = self.__cloneMouseEvent(e)
+            self.__lastMouseMove.ignore()
             e.accept()
             self.update()
 
 
     def getLastMouseLeftButton(self, clone=True) -> QMouseEvent:
         if clone:
-            return self.__cloneMouseEvent(self.__m_lastMouseLeftButton)
+            return self.__cloneMouseEvent(self.__lastMouseLeftButton)
         else:
-            return self.__m_lastMouseLeftButton
+            return self.__lastMouseLeftButton
 
     def getLastMouseButton(self, clone=True) -> QMouseEvent:
         if clone:
-            return self.__cloneMouseEvent(self.__m_lastMouseButton)
+            return self.__cloneMouseEvent(self.__lastMouseButton)
         else:
-            return self.__m_lastMouseButton
+            return self.__lastMouseButton
 
     def getLastMoveEvent(self, clone=True) -> QMouseEvent:
         if clone:
-            return self.__cloneMouseEvent(self.__m_lastMouseMove)
+            return self.__cloneMouseEvent(self.__lastMouseMove)
         else:
-            return self.__m_lastMouseMove
+            return self.__lastMouseMove
 
     # def getLastWheelEvent(self) -> QWheelEvent:
-    #     return self.__m_lastMouseWheel
+    #     return self.__lastMouseWheel
 
 
     def resetCamera(self):
-        self.__m_vtkFboRenderer.renderer.resetCamera()
+        self.__vtkFboRenderer.renderer.resetCamera()
         self.update()
 
     def getModelsRepresentation(self) -> int:
-        return self.__m_modelsRepresentationOption
+        return self.__modelsRepresentationOption
 
     def getModelsOpacity(self) -> float:
-        return self.__m_modelsOpacity
+        return self.__modelsOpacity
 
     def getGourauInterpolation(self) -> bool:
-        return self.__m_gouraudInterpolation
+        return self.__gouraudInterpolation
 
     def getModelColorR(self) -> int:
-        return self.__m_modelColorR
+        return self.__modelColorR
 
     def getModelColorG(self) -> int:
-        return self.__m_modelColorG
+        return self.__modelColorG
 
     def getModelColorB(self) -> int:
-        return self.__m_modelColorB
+        return self.__modelColorB
 
     def setModelsRepresentation(self, representationOption:int):
-        if self.__m_modelsRepresentationOption != representationOption:
-            self.__m_modelsRepresentationOption = representationOption
+        if self.__modelsRepresentationOption != representationOption:
+            self.__modelsRepresentationOption = representationOption
             self.update()
 
     def setModelsOpacity(self, opacity:float):
-        if self.__m_modelsOpacity != opacity:
-            self.__m_modelsOpacity = opacity
+        if self.__modelsOpacity != opacity:
+            self.__modelsOpacity = opacity
             self.update()
 
     def setGouraudInterpolation(self, gouraudInterpolation:bool):
-        if self.__m_gouraudInterpolation != gouraudInterpolation:
-            self.__m_gouraudInterpolation = gouraudInterpolation
+        if self.__gouraudInterpolation != gouraudInterpolation:
+            self.__gouraudInterpolation = gouraudInterpolation
             self.update()
 
     def setModelColorR(self, colorR:int):
-        if self.__m_modelColorR != colorR:
-            self.__m_modelColorR = colorR
+        if self.__modelColorR != colorR:
+            self.__modelColorR = colorR
             self.update()
 
     def setModelColorG(self, colorG:int):
-        if self.__m_modelColorG != colorG:
-            self.__m_modelColorG = colorG
+        if self.__modelColorG != colorG:
+            self.__modelColorG = colorG
             self.update()
 
     def setModelColorB(self, colorB:int):
-        if self.__m_modelColorB != colorB:
-            self.__m_modelColorB = colorB
+        if self.__modelColorB != colorB:
+            self.__modelColorB = colorB
             self.update()
 
     def getCommandsQueueFront(self) -> CommandModel:
-        return self.__m_commandsQueue.queue[0]
+        return self.__commandsQueue.queue[0]
 
     def commandsQueuePop(self):
-        self.__m_commandsQueue.get()
+        self.__commandsQueue.get()
 
     def isCommandsQueueEmpty(self) -> bool:
-        return self.__m_commandsQueue.empty()
+        return self.__commandsQueue.empty()
 
     def lockCommandsQueueMutex(self):
-        self.__m_commandsQueueMutex.acquire()
+        self.__commandsQueueMutex.acquire()
 
     def unlockCommandsQueueMutex(self):
-        self.__m_commandsQueueMutex.release()
+        self.__commandsQueueMutex.release()
 
     def __cloneMouseEvent(self, e:QMouseEvent):
         event_type = e.type()

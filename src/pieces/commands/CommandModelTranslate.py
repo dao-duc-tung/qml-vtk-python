@@ -13,10 +13,10 @@ class TranslateParams_t():
 
 class CommandModelTranslate(CommandModel):
     def __init__(self, vtkFboRenderer, translateData:TranslateParams_t, inTransition:bool):
-        self.__m_translateParams:TranslateParams_t = translateData
-        self.__m_inTransition:bool = inTransition
-        self.__m_needsTransformation:bool = True
-        self.__m_vtkFboRenderer = vtkFboRenderer
+        self.__translateParams:TranslateParams_t = translateData
+        self.__inTransition:bool = inTransition
+        self.__needsTransformation:bool = True
+        self.__vtkFboRenderer = vtkFboRenderer
 
     def isReady(self) -> bool:
         return True
@@ -24,19 +24,18 @@ class CommandModelTranslate(CommandModel):
     def __transformCoordinates(self):
         worldCoordinates = [0.0, 0.0, 0.0]
 
-        if self.__m_vtkFboRenderer.renderer.screenToWorld(self.__m_translateParams.screenX, self.__m_translateParams.screenY, worldCoordinates):
-            self.__m_translateParams.targetPositionX = worldCoordinates[0] - self.__m_translateParams.model.getMouseDeltaX()
-            self.__m_translateParams.targetPositionY = worldCoordinates[1] - self.__m_translateParams.model.getMouseDeltaY()
+        if self.__vtkFboRenderer.renderer.screenToWorld(self.__translateParams.screenX, self.__translateParams.screenY, worldCoordinates):
+            self.__translateParams.targetPositionX = worldCoordinates[0] - self.__translateParams.model.getMouseDeltaX()
+            self.__translateParams.targetPositionY = worldCoordinates[1] - self.__translateParams.model.getMouseDeltaY()
 
         else:
-            self.__m_translateParams.targetPositionX = self.__m_translateParams.model.getPositionX()
-            self.__m_translateParams.targetPositionY = self.__m_translateParams.model.getPositionY()
+            self.__translateParams.targetPositionX = self.__translateParams.model.getPositionX()
+            self.__translateParams.targetPositionY = self.__translateParams.model.getPositionY()
 
-        self.__m_needsTransformation = False
+        self.__needsTransformation = False
 
     def execute(self):
-        # Screen to world transformation can only be done within the Renderer thread
-        if self.__m_needsTransformation:
+        if self.__needsTransformation:
             self.__transformCoordinates()
 
-        self.__m_translateParams.model.translateToPosition(self.__m_translateParams.targetPositionX, self.__m_translateParams.targetPositionY)
+        self.__translateParams.model.translateToPosition(self.__translateParams.targetPositionX, self.__translateParams.targetPositionY)

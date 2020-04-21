@@ -52,213 +52,213 @@ class RendererHelper(QObject):
     def __init__(self):
         qDebug('RendererHelper::__init__()')
         super().__init__()
-        self.__m_vtkFboItem = None
+        self.__vtkFboItem = None
         self.gl = QOpenGLFunctions()
-        self.__m_processingEngine:ProcessingEngine = None
+        self.__processingEngine:ProcessingEngine = None
 
-        self.__m_selectedModel:Model = None
-        self.__m_selectedActor:vtk.vtkActor = None
-        self.__m_isModelSelected:bool = False
+        self.__selectedModel:Model = None
+        self.__selectedActor:vtk.vtkActor = None
+        self.__isModelSelected:bool = False
 
-        self.__m_selectedModelPositionX:float = 0.0
-        self.__m_selectedModelPositionY:float = 0.0
+        self.__selectedModelPositionX:float = 0.0
+        self.__selectedModelPositionY:float = 0.0
 
-        self.__m_mouseLeftButton:QMouseEvent = None
-        self.__m_mouseEvent:QMouseEvent = None
-        self.__m_moveEvent:QMouseEvent = None
-        # self.__m_wheelEvent:QWheelEvent = None
+        self.__mouseLeftButton:QMouseEvent = None
+        self.__mouseEvent:QMouseEvent = None
+        self.__moveEvent:QMouseEvent = None
+        # self.__wheelEvent:QWheelEvent = None
 
-        self.__m_platformModel:vtk.vtkCubeSource = None
-        self.__m_platformGrid:vtk.vtkPolyData = None
-        self.__m_platformModelActor:vtk.vtkActor = None
-        self.__m_platformGridActor:vtk.vtkActor = None
+        self.__platformModel:vtk.vtkCubeSource = None
+        self.__platformGrid:vtk.vtkPolyData = None
+        self.__platformModelActor:vtk.vtkActor = None
+        self.__platformGridActor:vtk.vtkActor = None
 
-        self.__m_platformWidth:float = 200.0
-        self.__m_platformDepth:float = 200.0
-        # self.__m_platformHeight:float = 200.0
-        self.__m_platformThickness:float = 2.0
-        self.__m_gridBottomHeight:float = 0.15
-        self.__m_gridSize:np.uint16 = 10
+        self.__platformWidth:float = 200.0
+        self.__platformDepth:float = 200.0
+        # self.__platformHeight:float = 200.0
+        self.__platformThickness:float = 2.0
+        self.__gridBottomHeight:float = 0.15
+        self.__gridSize:np.uint16 = 10
 
-        # self.__m_camPositionX:float = 0.0
-        # self.__m_camPositionY:float = 0.0
-        # self.__m_camPositionZ:float = 0.0
+        # self.__camPositionX:float = 0.0
+        # self.__camPositionY:float = 0.0
+        # self.__camPositionZ:float = 0.0
 
-        self.__m_clickPositionZ:float = 0.0
+        self.__clickPositionZ:float = 0.0
 
-        self.__m_firstRender:bool = True
+        self.__firstRender:bool = True
 
-        self.__m_modelsRepresentationOption:int = 0
-        self.__m_modelsOpacity:float = 1.0
-        self.__m_modelsGouraudInterpolation:bool = False
+        self.__modelsRepresentationOption:int = 0
+        self.__modelsOpacity:float = 1.0
+        self.__modelsGouraudInterpolation:bool = False
 
         #* Renderer
         #* https://vtk.org/doc/nightly/html/classQVTKOpenGLNativeWidget.html#details
         # QSurfaceFormat.setDefaultFormat(QVTKOpenGLNativeWidget.defaultFormat()) # from vtk 8.2.0
         # QSurfaceFormat.setDefaultFormat(fmt)
-        self.__m_vtkRenderWindow:vtk.vtkGenericOpenGLRenderWindow = vtk.vtkGenericOpenGLRenderWindow()
-        self.__m_renderer:vtk.vtkRenderer = vtk.vtkRenderer()
-        self.__m_vtkRenderWindow.AddRenderer(self.__m_renderer)
+        self.__vtkRenderWindow:vtk.vtkGenericOpenGLRenderWindow = vtk.vtkGenericOpenGLRenderWindow()
+        self.__renderer:vtk.vtkRenderer = vtk.vtkRenderer()
+        self.__vtkRenderWindow.AddRenderer(self.__renderer)
 
         #* Interactor
-        self.__m_vtkRenderWindowInteractor:vtk.vtkGenericRenderWindowInteractor = vtk.vtkGenericRenderWindowInteractor()
-        self.__m_vtkRenderWindowInteractor.EnableRenderOff()
-        self.__m_vtkRenderWindow.SetInteractor(self.__m_vtkRenderWindowInteractor)
+        self.__vtkRenderWindowInteractor:vtk.vtkGenericRenderWindowInteractor = vtk.vtkGenericRenderWindowInteractor()
+        self.__vtkRenderWindowInteractor.EnableRenderOff()
+        self.__vtkRenderWindow.SetInteractor(self.__vtkRenderWindowInteractor)
 
         #* Initialize the OpenGL context for the renderer
-        self.__m_vtkRenderWindow.OpenGLInitContext()
+        self.__vtkRenderWindow.OpenGLInitContext()
 
         #* Interactor Style
         style = vtk.vtkInteractorStyleTrackballCamera()
-        style.SetDefaultRenderer(self.__m_renderer)
+        style.SetDefaultRenderer(self.__renderer)
         style.SetMotionFactor(10.0)
-        self.__m_vtkRenderWindowInteractor.SetInteractorStyle(style)
+        self.__vtkRenderWindowInteractor.SetInteractorStyle(style)
 
         #* Picker
-        self.__m_picker:vtk.vtkCellPicker = vtk.vtkCellPicker()
-        self.__m_picker.SetTolerance(0.0)
+        self.__picker:vtk.vtkCellPicker = vtk.vtkCellPicker()
+        self.__picker.SetTolerance(0.0)
 
     def setVtkFboItem(self, vtkFboItem):
         qDebug('RendererHelper::setVtkFboItem()')
-        self.__m_vtkFboItem = vtkFboItem
+        self.__vtkFboItem = vtkFboItem
 
     def setProcessingEngine(self, processingEngine:ProcessingEngine):
         qDebug('RendererHelper::setProcessingEngine()')
-        self.__m_processingEngine = processingEngine
+        self.__processingEngine = processingEngine
 
     def synchronize(self, item:QQuickFramebufferObject):
         # qDebug('RendererHelper::synchronize()')
         #* the first synchronize
-        # if not self.__m_vtkFboItem:
+        # if not self.__vtkFboItem:
         #     from QVTKFramebufferObjectItem import QVTKFramebufferObjectItem
-        #     self.__m_vtkFboItem = (QVTKFramebufferObjectItem)(item)
+        #     self.__vtkFboItem = (QVTKFramebufferObjectItem)(item)
 
-        # if not self.__m_vtkFboItem.isInitialized():
-        #     self.__m_vtkFboItem.setVtkRendererHelper(self)
-        #     self.__m_vtkFboItem.rendererInitialized.emit()
+        # if not self.__vtkFboItem.isInitialized():
+        #     self.__vtkFboItem.setVtkRendererHelper(self)
+        #     self.__vtkFboItem.rendererInitialized.emit()
 
-        rendererSize = self.__m_vtkRenderWindow.GetSize()
-        if self.__m_vtkFboItem.width() != rendererSize[0] or self.__m_vtkFboItem.height() != rendererSize[1]:
-            self.__m_vtkRenderWindow.SetSize(int(self.__m_vtkFboItem.width()), int(self.__m_vtkFboItem.height()))
+        rendererSize = self.__vtkRenderWindow.GetSize()
+        if self.__vtkFboItem.width() != rendererSize[0] or self.__vtkFboItem.height() != rendererSize[1]:
+            self.__vtkRenderWindow.SetSize(int(self.__vtkFboItem.width()), int(self.__vtkFboItem.height()))
 
         #* Copy mouse events
-        if not self.__m_vtkFboItem.getLastMouseLeftButton(clone=False).isAccepted():
-            self.__m_mouseLeftButton = self.__m_vtkFboItem.getLastMouseLeftButton()
-            self.__m_vtkFboItem.getLastMouseLeftButton(clone=False).accept()
+        if not self.__vtkFboItem.getLastMouseLeftButton(clone=False).isAccepted():
+            self.__mouseLeftButton = self.__vtkFboItem.getLastMouseLeftButton()
+            self.__vtkFboItem.getLastMouseLeftButton(clone=False).accept()
 
-        if not self.__m_vtkFboItem.getLastMouseButton(clone=False).isAccepted():
-            self.__m_mouseEvent = self.__m_vtkFboItem.getLastMouseButton()
-            self.__m_vtkFboItem.getLastMouseButton(clone=False).accept()
+        if not self.__vtkFboItem.getLastMouseButton(clone=False).isAccepted():
+            self.__mouseEvent = self.__vtkFboItem.getLastMouseButton()
+            self.__vtkFboItem.getLastMouseButton(clone=False).accept()
 
-        if not self.__m_vtkFboItem.getLastMoveEvent(clone=False).isAccepted():
-            self.__m_moveEvent = self.__m_vtkFboItem.getLastMoveEvent()
-            self.__m_vtkFboItem.getLastMoveEvent(clone=False).accept()
+        if not self.__vtkFboItem.getLastMoveEvent(clone=False).isAccepted():
+            self.__moveEvent = self.__vtkFboItem.getLastMoveEvent()
+            self.__vtkFboItem.getLastMoveEvent(clone=False).accept()
 
-        # if not self.__m_vtkFboItem.getLastWheelEvent().isAccepted():
-        #     self.__m_wheelEvent = self.__m_vtkFboItem.getLastWheelEvent()
-        #     self.__m_vtkFboItem.getLastWheelEvent().accept()
+        # if not self.__vtkFboItem.getLastWheelEvent().isAccepted():
+        #     self.__wheelEvent = self.__vtkFboItem.getLastWheelEvent()
+        #     self.__vtkFboItem.getLastWheelEvent().accept()
 
         #* Get extra data
-        self.__m_modelsRepresentationOption = self.__m_vtkFboItem.getModelsRepresentation()
-        self.__m_modelsOpacity = self.__m_vtkFboItem.getModelsOpacity()
-        self.__m_modelsGouraudInterpolation = self.__m_vtkFboItem.getGourauInterpolation()
-        setSelectedModelColor(QColor(self.__m_vtkFboItem.getModelColorR(), self.__m_vtkFboItem.getModelColorG(), self.__m_vtkFboItem.getModelColorB()))
+        self.__modelsRepresentationOption = self.__vtkFboItem.getModelsRepresentation()
+        self.__modelsOpacity = self.__vtkFboItem.getModelsOpacity()
+        self.__modelsGouraudInterpolation = self.__vtkFboItem.getGourauInterpolation()
+        setSelectedModelColor(QColor(self.__vtkFboItem.getModelColorR(), self.__vtkFboItem.getModelColorG(), self.__vtkFboItem.getModelColorB()))
 
     def render(self):
-        self.__m_vtkRenderWindow.PushState()
+        self.__vtkRenderWindow.PushState()
         self.openGLInitState()
-        self.__m_vtkRenderWindow.Start()
+        self.__vtkRenderWindow.Start()
 
-        if self.__m_firstRender:
+        if self.__firstRender:
             self.initScene()
-            self.__m_firstRender = False
+            self.__firstRender = False
 
         #* Process camera related commands
 
         #* Process mouse event
-        if self.__m_mouseEvent and not self.__m_mouseEvent.isAccepted():
-            self.__m_vtkRenderWindowInteractor.SetEventInformationFlipY(
-                self.__m_mouseEvent.x(),
-                self.__m_mouseEvent.y(),
-                1 if (self.__m_mouseEvent.modifiers() & Qt.ControlModifier) > 0 else 0,
-                1 if (self.__m_mouseEvent.modifiers() & Qt.ShiftModifier) > 0 else 0,
+        if self.__mouseEvent and not self.__mouseEvent.isAccepted():
+            self.__vtkRenderWindowInteractor.SetEventInformationFlipY(
+                self.__mouseEvent.x(),
+                self.__mouseEvent.y(),
+                1 if (self.__mouseEvent.modifiers() & Qt.ControlModifier) > 0 else 0,
+                1 if (self.__mouseEvent.modifiers() & Qt.ShiftModifier) > 0 else 0,
                 '0',
-                1 if self.__m_mouseEvent.type() == QEvent.MouseButtonDblClick else 0
+                1 if self.__mouseEvent.type() == QEvent.MouseButtonDblClick else 0
             )
 
-            if self.__m_mouseEvent.type() == QEvent.MouseButtonPress:
-                self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.LeftButtonPressEvent)
-            elif self.__m_mouseEvent.type() == QEvent.MouseButtonRelease:
-                self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.LeftButtonReleaseEvent)
+            if self.__mouseEvent.type() == QEvent.MouseButtonPress:
+                self.__vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.LeftButtonPressEvent)
+            elif self.__mouseEvent.type() == QEvent.MouseButtonRelease:
+                self.__vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.LeftButtonReleaseEvent)
 
-            self.__m_mouseEvent.accept()
+            self.__mouseEvent.accept()
 
         #* Process move event
-        if self.__m_moveEvent and not self.__m_moveEvent.isAccepted():
-            if self.__m_moveEvent.type() == QEvent.MouseMove and self.__m_moveEvent.buttons() & Qt.RightButton:
-                self.__m_vtkRenderWindowInteractor.SetEventInformationFlipY(
-                    self.__m_moveEvent.x(),
-                    self.__m_moveEvent.y(),
-                    1 if (self.__m_moveEvent.modifiers() & Qt.ControlModifier) > 0 else 0,
-                    1 if (self.__m_moveEvent.modifiers() & Qt.ShiftModifier) > 0 else 0,
+        if self.__moveEvent and not self.__moveEvent.isAccepted():
+            if self.__moveEvent.type() == QEvent.MouseMove and self.__moveEvent.buttons() & Qt.RightButton:
+                self.__vtkRenderWindowInteractor.SetEventInformationFlipY(
+                    self.__moveEvent.x(),
+                    self.__moveEvent.y(),
+                    1 if (self.__moveEvent.modifiers() & Qt.ControlModifier) > 0 else 0,
+                    1 if (self.__moveEvent.modifiers() & Qt.ShiftModifier) > 0 else 0,
                     '0',
-                    1 if self.__m_moveEvent.type() == QEvent.MouseButtonDblClick else 0
+                    1 if self.__moveEvent.type() == QEvent.MouseButtonDblClick else 0
                 )
 
-                self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.MouseMoveEvent)
+                self.__vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.MouseMoveEvent)
 
-            self.__m_moveEvent.accept()
+            self.__moveEvent.accept()
 
         # #* Process wheel event
-        # if self.__m_wheelEvent and not self.__m_wheelEvent.isAccepted():
-        #     if self.__m_wheelEvent.delta() > 0:
-        #         self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.MouseWheelForwardEvent, self.__m_wheelEvent)
-        #     elif self.__m_wheelEvent.delta() < 0:
-        #         self.__m_vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.MouseWheelBackwardEvent, self.__m_wheelEvent)
+        # if self.__wheelEvent and not self.__wheelEvent.isAccepted():
+        #     if self.__wheelEvent.delta() > 0:
+        #         self.__vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.MouseWheelForwardEvent, self.__wheelEvent)
+        #     elif self.__wheelEvent.delta() < 0:
+        #         self.__vtkRenderWindowInteractor.InvokeEvent(vtk.vtkCommand.MouseWheelBackwardEvent, self.__wheelEvent)
 
-        #     self.__m_wheelEvent.accept()
+        #     self.__wheelEvent.accept()
 
         #* Process model related commands
 
         #* Select model
-        if self.__m_mouseLeftButton and not self.__m_mouseLeftButton.isAccepted():
-            self.__selectModel(self.__m_mouseLeftButton.x(), self.__m_mouseLeftButton.y())
-            self.__m_mouseLeftButton.accept()
+        if self.__mouseLeftButton and not self.__mouseLeftButton.isAccepted():
+            self.__selectModel(self.__mouseLeftButton.x(), self.__mouseLeftButton.y())
+            self.__mouseLeftButton.accept()
 
         #* Model transformations
 
         command = None # CommandModel
-        while not self.__m_vtkFboItem.isCommandsQueueEmpty():
-            self.__m_vtkFboItem.lockCommandsQueueMutex()
+        while not self.__vtkFboItem.isCommandsQueueEmpty():
+            self.__vtkFboItem.lockCommandsQueueMutex()
 
-            command = self.__m_vtkFboItem.getCommandsQueueFront()
+            command = self.__vtkFboItem.getCommandsQueueFront()
             if not command.isReady():
-                self.__m_vtkFboItem.unlockCommandsQueueMutex()
+                self.__vtkFboItem.unlockCommandsQueueMutex()
                 break
-            self.__m_vtkFboItem.commandsQueuePop()
+            self.__vtkFboItem.commandsQueuePop()
 
-            self.__m_vtkFboItem.unlockCommandsQueueMutex()
+            self.__vtkFboItem.unlockCommandsQueueMutex()
 
             command.execute()
 
         #* Reset the view-up vector. self improves the interaction of the camera with the plate.
-        self.__m_renderer.GetActiveCamera().SetViewUp(0.0, 0.0, 1.0)
+        self.__renderer.GetActiveCamera().SetViewUp(0.0, 0.0, 1.0)
 
         #* Extra actions
-        self.__m_processingEngine.setModelsRepresentation(self.__m_modelsRepresentationOption)
-        self.__m_processingEngine.setModelsOpacity(self.__m_modelsOpacity)
-        self.__m_processingEngine.setModelsGouraudInterpolation(self.__m_modelsGouraudInterpolation)
-        self.__m_processingEngine.updateModelsColor()
+        self.__processingEngine.setModelsRepresentation(self.__modelsRepresentationOption)
+        self.__processingEngine.setModelsOpacity(self.__modelsOpacity)
+        self.__processingEngine.setModelsGouraudInterpolation(self.__modelsGouraudInterpolation)
+        self.__processingEngine.updateModelsColor()
 
         #* Render
-        self.__m_vtkRenderWindow.Render()
-        self.__m_vtkRenderWindow.PopState()
+        self.__vtkRenderWindow.Render()
+        self.__vtkRenderWindow.PopState()
 
-        self.__m_vtkFboItem.window().resetOpenGLState()
+        self.__vtkFboItem.window().resetOpenGLState()
 
     def openGLInitState(self):
-        self.__m_vtkRenderWindow.OpenGLInitState()
-        self.__m_vtkRenderWindow.MakeCurrent()
+        self.__vtkRenderWindow.OpenGLInitState()
+        self.__vtkRenderWindow.MakeCurrent()
         self.gl.initializeOpenGLFunctions()
         self.gl.glUseProgram(0)
 
@@ -274,20 +274,20 @@ class RendererHelper(QObject):
     # else
         framebufferObject = QOpenGLFramebufferObject(size, format)
     # endif
-        self.__m_vtkRenderWindow.SetBackLeftBuffer(GL.GL_COLOR_ATTACHMENT0)
-        self.__m_vtkRenderWindow.SetFrontLeftBuffer(GL.GL_COLOR_ATTACHMENT0)
-        self.__m_vtkRenderWindow.SetBackBuffer(GL.GL_COLOR_ATTACHMENT0)
-        self.__m_vtkRenderWindow.SetFrontBuffer(GL.GL_COLOR_ATTACHMENT0)
-        self.__m_vtkRenderWindow.SetSize(framebufferObject.size().width(), framebufferObject.size().height())
-        self.__m_vtkRenderWindow.SetOffScreenRendering(True)
-        self.__m_vtkRenderWindow.Modified()
+        self.__vtkRenderWindow.SetBackLeftBuffer(GL.GL_COLOR_ATTACHMENT0)
+        self.__vtkRenderWindow.SetFrontLeftBuffer(GL.GL_COLOR_ATTACHMENT0)
+        self.__vtkRenderWindow.SetBackBuffer(GL.GL_COLOR_ATTACHMENT0)
+        self.__vtkRenderWindow.SetFrontBuffer(GL.GL_COLOR_ATTACHMENT0)
+        self.__vtkRenderWindow.SetSize(framebufferObject.size().width(), framebufferObject.size().height())
+        self.__vtkRenderWindow.SetOffScreenRendering(True)
+        self.__vtkRenderWindow.Modified()
         framebufferObject.release()
         return framebufferObject
 
     def initScene(self):
         qDebug('RendererHelper::initScene()')
 
-        self.__m_vtkRenderWindow.SetOffScreenRendering(True)
+        self.__vtkRenderWindow.SetOffScreenRendering(True)
 
         #* Top background color
         r2 = 245.0 / 255.0
@@ -299,9 +299,9 @@ class RendererHelper(QObject):
         g1 = 170.0 / 255.0
         b1 = 170.0 / 255.0
 
-        self.__m_renderer.SetBackground(r2, g2, b2)
-        self.__m_renderer.SetBackground2(r1, g1, b1)
-        self.__m_renderer.GradientBackgroundOn()
+        self.__renderer.SetBackground(r2, g2, b2)
+        self.__renderer.SetBackground2(r1, g1, b1)
+        self.__renderer.GradientBackgroundOn()
 
         # #* Axes
         axes = vtk.vtkAxesActor()
@@ -314,7 +314,7 @@ class RendererHelper(QObject):
         axes.GetXAxisCaptionActor2D().GetCaptionTextProperty().SetFontSize(axes_label_font_size)
         axes.GetYAxisCaptionActor2D().GetCaptionTextProperty().SetFontSize(axes_label_font_size)
         axes.GetZAxisCaptionActor2D().GetCaptionTextProperty().SetFontSize(axes_label_font_size)
-        self.__m_renderer.AddActor(axes)
+        self.__renderer.AddActor(axes)
 
         # #* Platform
         self.__generatePlatform()
@@ -328,33 +328,33 @@ class RendererHelper(QObject):
         #* Platform Model
         platformModelMapper = vtk.vtkPolyDataMapper()
 
-        self.__m_platformModel = vtk.vtkCubeSource()
-        platformModelMapper.SetInputConnection(self.__m_platformModel.GetOutputPort())
+        self.__platformModel = vtk.vtkCubeSource()
+        platformModelMapper.SetInputConnection(self.__platformModel.GetOutputPort())
 
-        self.__m_platformModelActor = vtk.vtkActor()
-        self.__m_platformModelActor.SetMapper(platformModelMapper)
-        self.__m_platformModelActor.GetProperty().SetColor(1, 1, 1)
-        self.__m_platformModelActor.GetProperty().LightingOn()
-        self.__m_platformModelActor.GetProperty().SetOpacity(1)
-        self.__m_platformModelActor.GetProperty().SetAmbient(0.45)
-        self.__m_platformModelActor.GetProperty().SetDiffuse(0.4)
+        self.__platformModelActor = vtk.vtkActor()
+        self.__platformModelActor.SetMapper(platformModelMapper)
+        self.__platformModelActor.GetProperty().SetColor(1, 1, 1)
+        self.__platformModelActor.GetProperty().LightingOn()
+        self.__platformModelActor.GetProperty().SetOpacity(1)
+        self.__platformModelActor.GetProperty().SetAmbient(0.45)
+        self.__platformModelActor.GetProperty().SetDiffuse(0.4)
 
-        self.__m_platformModelActor.PickableOff()
-        self.__m_renderer.AddActor(self.__m_platformModelActor)
+        self.__platformModelActor.PickableOff()
+        self.__renderer.AddActor(self.__platformModelActor)
 
         #* Platform Grid
-        self.__m_platformGrid = vtk.vtkPolyData()
+        self.__platformGrid = vtk.vtkPolyData()
 
         platformGridMapper = vtk.vtkPolyDataMapper()
-        platformGridMapper.SetInputData(self.__m_platformGrid)
+        platformGridMapper.SetInputData(self.__platformGrid)
 
-        self.__m_platformGridActor = vtk.vtkActor()
-        self.__m_platformGridActor.SetMapper(platformGridMapper)
-        self.__m_platformGridActor.GetProperty().LightingOff()
-        self.__m_platformGridActor.GetProperty().SetColor(0.45, 0.45, 0.45)
-        self.__m_platformGridActor.GetProperty().SetOpacity(1)
-        self.__m_platformGridActor.PickableOff()
-        self.__m_renderer.AddActor(self.__m_platformGridActor)
+        self.__platformGridActor = vtk.vtkActor()
+        self.__platformGridActor.SetMapper(platformGridMapper)
+        self.__platformGridActor.GetProperty().LightingOff()
+        self.__platformGridActor.GetProperty().SetColor(0.45, 0.45, 0.45)
+        self.__platformGridActor.GetProperty().SetOpacity(1)
+        self.__platformGridActor.PickableOff()
+        self.__renderer.AddActor(self.__platformGridActor)
 
         self.__updatePlatform()
 
@@ -363,28 +363,28 @@ class RendererHelper(QObject):
 
         #* Platform Model
 
-        if self.__m_platformModel:
-            self.__m_platformModel.SetXLength(self.__m_platformWidth)
-            self.__m_platformModel.SetYLength(self.__m_platformDepth)
-            self.__m_platformModel.SetZLength(self.__m_platformThickness)
-            self.__m_platformModel.SetCenter(0.0, 0.0, -self.__m_platformThickness / 2)
+        if self.__platformModel:
+            self.__platformModel.SetXLength(self.__platformWidth)
+            self.__platformModel.SetYLength(self.__platformDepth)
+            self.__platformModel.SetZLength(self.__platformThickness)
+            self.__platformModel.SetCenter(0.0, 0.0, -self.__platformThickness / 2)
 
         #* Platform Grid
         gridPoints = vtk.vtkPoints()
         gridCells = vtk.vtkCellArray()
 
-        i = -self.__m_platformWidth / 2
-        while i <= self.__m_platformWidth / 2:
-            self.__createLine(i, -self.__m_platformDepth / 2, self.__m_gridBottomHeight, i, self.__m_platformDepth / 2, self.__m_gridBottomHeight, gridPoints, gridCells)
-            i += self.__m_gridSize
+        i = -self.__platformWidth / 2
+        while i <= self.__platformWidth / 2:
+            self.__createLine(i, -self.__platformDepth / 2, self.__gridBottomHeight, i, self.__platformDepth / 2, self.__gridBottomHeight, gridPoints, gridCells)
+            i += self.__gridSize
 
-        i = -self.__m_platformDepth / 2
-        while i <= self.__m_platformDepth / 2:
-            self.__createLine(-self.__m_platformWidth / 2, i, self.__m_gridBottomHeight, self.__m_platformWidth / 2, i, self.__m_gridBottomHeight, gridPoints, gridCells)
-            i += self.__m_gridSize
+        i = -self.__platformDepth / 2
+        while i <= self.__platformDepth / 2:
+            self.__createLine(-self.__platformWidth / 2, i, self.__gridBottomHeight, self.__platformWidth / 2, i, self.__gridBottomHeight, gridPoints, gridCells)
+            i += self.__gridSize
 
-        self.__m_platformGrid.SetPoints(gridPoints)
-        self.__m_platformGrid.SetLines(gridCells)
+        self.__platformGrid.SetPoints(gridPoints)
+        self.__platformGrid.SetLines(gridCells)
 
     def __createLine(self, x1:float, y1:float, z1:float, x2:float, y2:float, z2:float, points:vtk.vtkPoints, cells:vtk.vtkCellArray):
         line = vtk.vtkPolyLine()
@@ -399,96 +399,96 @@ class RendererHelper(QObject):
         cells.InsertNextCell(line)
 
     def addModelActor(self, model:Model):
-        self.__m_renderer.AddActor(model.getModelActor())
+        self.__renderer.AddActor(model.getModelActor())
         # qDebug(f'RendererHelper::addModelActor(): Model added {model}')
 
     def __selectModel(self, x:np.int16, y:np.int16):
         qDebug('RendererHelper::__selectModel()')
 
         #*  the y-axis flip for the pickin:
-        self.__m_picker.Pick(x, self.__m_renderer.GetSize()[1] - y, 0, self.__m_renderer)
+        self.__picker.Pick(x, self.__renderer.GetSize()[1] - y, 0, self.__renderer)
 
         #* Get pick position
         # clickPosition = [0.0, 0.0, 0.0]
-        # self.__m_picker.GetPickPosition(clickPosition)
-        clickPosition = self.__m_picker.GetPickPosition()
-        self.__m_clickPositionZ = clickPosition[2]
+        # self.__picker.GetPickPosition(clickPosition)
+        clickPosition = self.__picker.GetPickPosition()
+        self.__clickPositionZ = clickPosition[2]
 
-        if self.__m_selectedActor == self.__m_picker.GetActor():
-            if self.__m_selectedModel:
-                self.__m_selectedModel.setMouseDeltaXY(clickPosition[0] - self.__m_selectedModel.getPositionX(), clickPosition[1] - self.__m_selectedModel.getPositionY())
+        if self.__selectedActor == self.__picker.GetActor():
+            if self.__selectedModel:
+                self.__selectedModel.setMouseDeltaXY(clickPosition[0] - self.__selectedModel.getPositionX(), clickPosition[1] - self.__selectedModel.getPositionY())
             return
 
         #* Disconnect signals
-        if self.__m_selectedModel:
+        if self.__selectedModel:
             self.__clearSelectedModel()
 
         #* Pick the new actor
-        self.__m_selectedActor = self.__m_picker.GetActor()
+        self.__selectedActor = self.__picker.GetActor()
 
-        self.__m_selectedModel = self.__getSelectedModelNoLock()
+        self.__selectedModel = self.__getSelectedModelNoLock()
 
-        if self.__m_selectedActor:
-            # qDebug(f'RendererHelper::__selectModel(): picked actor {self.__m_selectedActor}')
+        if self.__selectedActor:
+            # qDebug(f'RendererHelper::__selectModel(): picked actor {self.__selectedActor}')
 
-            self.__m_selectedModel.setSelected(True)
+            self.__selectedModel.setSelected(True)
 
             #* Connect signals
-            self.__m_selectedModel.positionXChanged.connect(self.setSelectedModelPositionX)
-            self.__m_selectedModel.positionYChanged.connect(self.setSelectedModelPositionY)
+            self.__selectedModel.positionXChanged.connect(self.setSelectedModelPositionX)
+            self.__selectedModel.positionYChanged.connect(self.setSelectedModelPositionY)
 
-            self.setSelectedModelPositionX(self.__m_selectedModel.getPositionX())
-            self.setSelectedModelPositionY(self.__m_selectedModel.getPositionY())
+            self.setSelectedModelPositionX(self.__selectedModel.getPositionX())
+            self.setSelectedModelPositionY(self.__selectedModel.getPositionY())
 
             self.__setIsModelSelected(True)
 
             #* Set mouse click delta from center position
-            self.__m_selectedModel.setMouseDeltaXY(clickPosition[0] - self.__m_selectedModel.getPositionX(), clickPosition[1] - self.__m_selectedModel.getPositionY())
+            self.__selectedModel.setMouseDeltaXY(clickPosition[0] - self.__selectedModel.getPositionX(), clickPosition[1] - self.__selectedModel.getPositionY())
         else:
             self.__setIsModelSelected(False)
 
         qDebug('RendererHelper::__selectModel() end')
 
     def __clearSelectedModel(self):
-        self.__m_selectedModel.setSelected(False)
+        self.__selectedModel.setSelected(False)
 
-        self.__m_selectedModel.positionXChanged.disconnect(self.setSelectedModelPositionX)
-        self.__m_selectedModel.positionYChanged.disconnect(self.setSelectedModelPositionY)
+        self.__selectedModel.positionXChanged.disconnect(self.setSelectedModelPositionX)
+        self.__selectedModel.positionYChanged.disconnect(self.setSelectedModelPositionY)
 
-        self.__m_selectedModel = None
-        self.__m_selectedActor = None
+        self.__selectedModel = None
+        self.__selectedActor = None
 
     def __setIsModelSelected(self, isModelSelected:bool):
-        if self.__m_isModelSelected != isModelSelected:
+        if self.__isModelSelected != isModelSelected:
             qDebug(f'RendererHelper::__setIsModelSelected(): {isModelSelected}')
-            self.__m_isModelSelected = isModelSelected
+            self.__isModelSelected = isModelSelected
             self.isModelSelectedChanged.emit(isModelSelected)
 
     def isModelSelected(self) -> bool:
-        return self.__m_isModelSelected
+        return self.__isModelSelected
 
     def getSelectedModel(self) -> Model:
         selectedModel = self.__getSelectedModelNoLock()
         return selectedModel
 
     def __getSelectedModelNoLock(self) -> Model:
-        return self.__m_processingEngine.getModelFromActor(self.__m_selectedActor)
+        return self.__processingEngine.getModelFromActor(self.__selectedActor)
 
     def setSelectedModelPositionX(self, positionX:float):
-        if self.__m_selectedModelPositionX != positionX:
-            self.__m_selectedModelPositionX = positionX
+        if self.__selectedModelPositionX != positionX:
+            self.__selectedModelPositionX = positionX
             self.selectedModelPositionXChanged.emit(positionX)
 
     def setSelectedModelPositionY(self, positionY:float):
-        if self.__m_selectedModelPositionY != positionY:
-            self.__m_selectedModelPositionY = positionY
+        if self.__selectedModelPositionY != positionY:
+            self.__selectedModelPositionY = positionY
             self.selectedModelPositionYChanged.emit(positionY)
 
     def getSelectedModelPositionX(self) -> float:
-        return self.__m_selectedModelPositionX
+        return self.__selectedModelPositionX
 
     def getSelectedModelPositionY(self) -> float:
-        return self.__m_selectedModelPositionY
+        return self.__selectedModelPositionY
 
     def screenToWorld(self, screenX:np.int16, screenY:np.int16, worldPos:list) -> bool: # list of float
         #* Create  planes for projection plan:
@@ -508,7 +508,7 @@ class RendererHelper(QObject):
 
         #* Create projection plane parallel platform and Z coordinate from clicked position in model
         plane = vtk.vtkPlane()
-        plane.SetOrigin(0.0, 0.0, self.__m_clickPositionZ)
+        plane.SetOrigin(0.0, 0.0, self.__clickPositionZ)
         plane.SetNormal(0.0, 0.0, 1.0)
 
         #* Set projection and bounding planes to placer
@@ -526,9 +526,9 @@ class RendererHelper(QObject):
 
         screenPos[0] = screenX
         #*  the y-axis flip for the pickin:
-        screenPos[1] = self.__m_renderer.GetSize()[1] - screenY
+        screenPos[1] = self.__renderer.GetSize()[1] - screenY
 
-        withinBounds = placer.ComputeWorldPosition(self.__m_renderer, screenPos, worldPos, worldOrient) # int16_t
+        withinBounds = placer.ComputeWorldPosition(self.__renderer, screenPos, worldPos, worldOrient) # int16_t
 
         return withinBounds
 
@@ -537,7 +537,7 @@ class RendererHelper(QObject):
         m_camPositionX = -237.885
         m_camPositionY = -392.348
         m_camPositionZ = 369.477
-        self.__m_renderer.GetActiveCamera().SetPosition(m_camPositionX, m_camPositionY, m_camPositionZ)
-        self.__m_renderer.GetActiveCamera().SetFocalPoint(0.0, 0.0, 0.0)
-        self.__m_renderer.GetActiveCamera().SetViewUp(0.0, 0.0, 1.0)
-        self.__m_renderer.ResetCameraClippingRange()
+        self.__renderer.GetActiveCamera().SetPosition(m_camPositionX, m_camPositionY, m_camPositionZ)
+        self.__renderer.GetActiveCamera().SetFocalPoint(0.0, 0.0, 0.0)
+        self.__renderer.GetActiveCamera().SetViewUp(0.0, 0.0, 1.0)
+        self.__renderer.ResetCameraClippingRange()

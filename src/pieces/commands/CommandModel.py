@@ -1,6 +1,6 @@
 class CommandModel():
     def isReady(self) -> bool:
-        raise Exception('Not implemented')
+        raise NotImplementedError()
 
     def execute(self):
-        raise Exception('Not implemented')
+        raise NotImplementedError()

@@ -5,7 +5,7 @@ import vtk
 
 class ProcessingEngine():
     def __init__(self):
-        self.__m_models = [] # List of Model
+        self.__models = [] # List of Model
 
     def addModel(self, modelFilePath:QUrl) -> Model:
         qDebug('ProcessingEngine::addModel()')
@@ -31,9 +31,9 @@ class ProcessingEngine():
 
         #* Create Model instance and insert it into the vector
         model = Model(preprocessedPolydata)
-        self.__m_models.append(model)
+        self.__models.append(model)
 
-        return self.__m_models[-1]
+        return self.__models[-1]
 
     def preprocessPolydata(self, inputData:vtk.vtkPolyData) -> vtk.vtkPolyData:
         #* Center the polygon
@@ -61,28 +61,27 @@ class ProcessingEngine():
         model.translateToPosition(0, 0)
 
     def setModelsRepresentation(self, modelsRepresentationOption:int):
-        for model in self.__m_models:
+        for model in self.__models:
             model.getModelActor().GetProperty().SetRepresentation(modelsRepresentationOption)
 
     def setModelsOpacity(self, modelsOpacity:float):
-        for model in self.__m_models:
+        for model in self.__models:
             model.getModelActor().GetProperty().SetOpacity(modelsOpacity)
 
     def setModelsGouraudInterpolation(self, enableGouraudInterpolation:bool):
-        for model in self.__m_models:
+        for model in self.__models:
             if enableGouraudInterpolation:
                 model.getModelActor().GetProperty().SetInterpolationToGouraud()
             else:
                 model.getModelActor().GetProperty().SetInterpolationToFlat()
 
     def updateModelsColor(self):
-        for model in self.__m_models:
+        for model in self.__models:
             model.updateModelColor()
 
     def getModelFromActor(self, modelActor:vtk.vtkActor) -> Model:
-        for model in self.__m_models:
+        for model in self.__models:
             if model.getModelActor() == modelActor:
                 return model
-        # raise Exception('Cannot get model from actor')
         qDebug('Cannot get model from actor')
         return None

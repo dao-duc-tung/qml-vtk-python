@@ -14,11 +14,11 @@ class CanvasHandler(QObject):
 
     def __init__(self, sys_argv):
         super().__init__()
-        self.__m_previousWorldX:float = 0.0
-        self.__m_previousWorldY:float = 0.0
-        self.__m_draggingMouse:bool = False
-        self.__m_showFileDialog:bool = False
-        self.__m_vtkFboItem = None
+        self.__previousWorldX:float = 0.0
+        self.__previousWorldY:float = 0.0
+        self.__draggingMouse:bool = False
+        self.__showFileDialog:bool = False
+        self.__vtkFboItem = None
         #* Set style: https://stackoverflow.com/questions/43093797/PySide2-quickcontrols-material-style
         sys_argv += ['--style', 'material'] #! MUST HAVE
         app = QApplication(sys_argv)
@@ -28,11 +28,8 @@ class CanvasHandler(QObject):
         # print(engine.importPathList())
         app.setApplicationName('QtVTK-Py')
 
-        #* Register QML Types
-        qmlRegisterType(FboItem, 'QtVTK', 1, 0, 'VtkFboItem')
-
         # #* Create classes instances
-        self.__m_processingEngine = ProcessingEngine()
+        self.__processingEngine = ProcessingEngine()
 
         # #* Expose/Bind Python classes (QObject) to QML
         ctxt = engine.rootContext() # returns QQmlContext
@@ -43,17 +40,17 @@ class CanvasHandler(QObject):
 
         # #* Get reference to the QVTKFramebufferObjectItem in QML
         rootObject = engine.rootObjects()[0] # returns QObject
-        self.__m_vtkFboItem = rootObject.findChild(FboItem, 'vtkFboItem')
+        self.__vtkFboItem = rootObject.findChild(FboItem, 'vtkFboItem')
 
         # # #* Give the vtkFboItem reference to the CanvasHandler
-        if (self.__m_vtkFboItem):
+        if (self.__vtkFboItem):
             qDebug('CanvasHandler::CanvasHandler: setting vtkFboItem to CanvasHandler')
-            self.__m_vtkFboItem.setProcessingEngine(self.__m_processingEngine)
+            self.__vtkFboItem.setProcessingEngine(self.__processingEngine)
 
-            self.__m_vtkFboItem.rendererInitialized.connect(self.startApplication)
-            self.__m_vtkFboItem.isModelSelectedChanged.connect(self.isModelSelectedChanged)
-            self.__m_vtkFboItem.selectedModelPositionXChanged.connect(self.selectedModelPositionXChanged)
-            self.__m_vtkFboItem.selectedModelPositionYChanged.connect(self.selectedModelPositionYChanged)
+            self.__vtkFboItem.rendererInitialized.connect(self.startApplication)
+            self.__vtkFboItem.isModelSelectedChanged.connect(self.isModelSelectedChanged)
+            self.__vtkFboItem.selectedModelPositionXChanged.connect(self.selectedModelPositionXChanged)
+            self.__vtkFboItem.selectedModelPositionYChanged.connect(self.selectedModelPositionYChanged)
         else:
             qCritical('CanvasHandler::CanvasHandler: Unable to get vtkFboItem instance')
             return
@@ -62,12 +59,12 @@ class CanvasHandler(QObject):
         qDebug(f'CanvasHandler::CanvasHandler: Execution finished with return code: {rc}')
 
     def get_showFileDialog(self) -> bool:
-        return self.__m_showFileDialog
+        return self.__showFileDialog
 
     def set_showFileDialog(self, val:bool):
-        if self.__m_showFileDialog == val:
+        if self.__showFileDialog == val:
             return
-        self.__m_showFileDialog = val
+        self.__showFileDialog = val
         self.showFileDialogChanged.emit(val)
 
     #! PySide2 has limitations with the Property decorator, its setter since it is not recognized by QML
@@ -99,90 +96,90 @@ class CanvasHandler(QObject):
             localFilePath = qurl.toLocalFile()
         else:
             localFilePath = qurl
-        self.__m_vtkFboItem.addModelFromFile(localFilePath)
+        self.__vtkFboItem.addModelFromFile(localFilePath)
 
     @Slot(int,int,int)
     def mousePressEvent(self, button:int, screenX:int, screenY:int):
         qDebug('CanvasHandler::mousePressEvent()')
-        self.__m_vtkFboItem.selectModel(screenX, screenY)
+        self.__vtkFboItem.selectModel(screenX, screenY)
 
     @Slot(int,int,int)
     def mouseMoveEvent(self, button:int, screenX:int, screenY:int):
-        if not self.__m_vtkFboItem.isModelSelected():
+        if not self.__vtkFboItem.isModelSelected():
             return
 
-        if not self.__m_draggingMouse:
-            self.__m_draggingMouse = True
-            self.__m_previousWorldX = self.__m_vtkFboItem.getSelectedModelPositionX()
-            self.__m_previousWorldY = self.__m_vtkFboItem.getSelectedModelPositionY()
+        if not self.__draggingMouse:
+            self.__draggingMouse = True
+            self.__previousWorldX = self.__vtkFboItem.getSelectedModelPositionX()
+            self.__previousWorldY = self.__vtkFboItem.getSelectedModelPositionY()
 
         translateParams = TranslateParams_t()
         translateParams.screenX = screenX
         translateParams.screenY = screenY
-        self.__m_vtkFboItem.translateModel(translateParams, True)
+        self.__vtkFboItem.translateModel(translateParams, True)
 
     @Slot(int,int,int)
     def mouseReleaseEvent(self, button:int, screenX:int, screenY:int):
         qDebug('CanvasHandler::mouseReleaseEvent()')
-        if not self.__m_vtkFboItem.isModelSelected():
+        if not self.__vtkFboItem.isModelSelected():
             return
 
-        if self.__m_draggingMouse:
-            self.__m_draggingMouse = False
+        if self.__draggingMouse:
+            self.__draggingMouse = False
             translateParams = TranslateParams_t()
             translateParams.screenX = screenX
             translateParams.screenY = screenY
-            translateParams.previousPositionX = self.__m_previousWorldX
-            translateParams.previousPositionY = self.__m_previousWorldY
-            self.__m_vtkFboItem.translateModel(translateParams, False)
+            translateParams.previousPositionX = self.__previousWorldX
+            translateParams.previousPositionY = self.__previousWorldY
+            self.__vtkFboItem.translateModel(translateParams, False)
 
     @Slot(int)
     def setModelsRepresentation(self, representationOption:int):
-        self.__m_vtkFboItem.setModelsRepresentation(representationOption)
+        self.__vtkFboItem.setModelsRepresentation(representationOption)
 
     @Slot(float)
     def setModelsOpacity(self, opacity:float):
-        self.__m_vtkFboItem.setModelsOpacity(opacity)
+        self.__vtkFboItem.setModelsOpacity(opacity)
 
     @Slot(bool)
     def setGouraudInterpolation(self, gouraudInterpolation:bool):
-        self.__m_vtkFboItem.setGouraudInterpolation(gouraudInterpolation)
+        self.__vtkFboItem.setGouraudInterpolation(gouraudInterpolation)
 
     @Slot(int)
     def setModelColorR(self, colorR:int):
-        self.__m_vtkFboItem.setModelColorR(colorR)
+        self.__vtkFboItem.setModelColorR(colorR)
 
     @Slot(int)
     def setModelColorG(self, colorG:int):
-        self.__m_vtkFboItem.setModelColorG(colorG)
+        self.__vtkFboItem.setModelColorG(colorG)
 
     @Slot(int)
     def setModelColorB(self, colorB:int):
-        self.__m_vtkFboItem.setModelColorB(colorB)
+        self.__vtkFboItem.setModelColorB(colorB)
 
 
     def startApplication(self):
         qDebug('CanvasHandler::startApplication()')
-        self.__m_vtkFboItem.rendererInitialized.disconnect(self.startApplication)
+        self.__vtkFboItem.rendererInitialized.disconnect(self.startApplication)
 
 
     def getIsModelSelected(self) -> bool:
         #* QVTKFramebufferObjectItem might not be initialized when QML loads
-        if not self.__m_vtkFboItem:
+        if not self.__vtkFboItem:
             return False
-        return self.__m_vtkFboItem.isModelSelected()
+        return self.__vtkFboItem.isModelSelected()
 
     def getSelectedModelPositionX(self) -> float:
 	    #* QVTKFramebufferObjectItem might not be initialized when QML loads
-        if not self.__m_vtkFboItem:
+        if not self.__vtkFboItem:
             return 0
-        return self.__m_vtkFboItem.getSelectedModelPositionX()
+        return self.__vtkFboItem.getSelectedModelPositionX()
 
     def getSelectedModelPositionY(self) -> float:
         #* QVTKFramebufferObjectItem might not be initialized when QML loads
-        if not self.__m_vtkFboItem:
+        if not self.__vtkFboItem:
             return 0
-        return self.__m_vtkFboItem.getSelectedModelPositionY()
+        return self.__vtkFboItem.getSelectedModelPositionY()
 
 
     def __isModelExtensionValid(self, modelPath:QUrl) -> bool:
