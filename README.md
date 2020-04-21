@@ -22,11 +22,15 @@ conda install -c conda-forge pyside2 # Linux
 pip install PySide2 # Windows
 ```
 
-## Example
+## Update
+
+### 22/04/2020
 
 The application now is simplified
 
 Check out [this commit](https://github.com/dao-duc-tung/QtVTK-Py/commit/5d70062b1a931dabef072d4f4e58a73e9828f830) for previous version
+
+## Example
 
 ![Import and view STL files](resources/QmlVtk_1.gif "Import and view STL files")
 
