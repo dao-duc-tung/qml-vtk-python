@@ -2,18 +2,14 @@ from queue import Queue
 from threading import Lock
 from typing import List, Optional
 
-from PySide2.QtCore import (
-    QEvent,
-    QObject,
-    QSize,
-    Qt,
-)
+from PySide2.QtCore import QEvent, QObject, QSize, Qt
 from PySide2.QtGui import (
     QCursor,
     QMouseEvent,
     QOpenGLFramebufferObject,
     QOpenGLFramebufferObjectFormat,
     QOpenGLFunctions,
+    QWheelEvent,
 )
 from PySide2.QtQuick import QQuickFramebufferObject
 from PySide2.QtWidgets import QApplication
@@ -26,12 +22,15 @@ from src.utils import *
 class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
     def __init__(self):
         super(FboRenderer, self).__init__()
+        self.commandQueue = Queue()
+        self.commandQueueLock = Lock()
 
-        self.__glFunc = QOpenGLFunctions()
         self.rw = vtk.vtkExternalOpenGLRenderWindow()
         self.rwi = vtk.vtkGenericRenderWindowInteractor()
         self.rwi.SetRenderWindow(self.rw)
         self.rw.OpenGLInitContext()
+
+        self.__glFunc = QOpenGLFunctions()
         self.__isOpenGLStateInitialized = False
 
         self.__openGLFbo: QOpenGLFramebufferObject = None
@@ -39,9 +38,7 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
 
         self.__lastMouseButtonEvent: QMouseEvent = None
         self.__lastMouseMoveEvent: QMouseEvent = None
-
-        self.commandQueue = Queue()
-        self.commandQueueLock = Lock()
+        self.__lastWheelEvent: QWheelEvent = None
 
     def createFramebufferObject(self, size: QSize) -> QOpenGLFramebufferObject:
         gl_format = QOpenGLFramebufferObjectFormat()
@@ -73,6 +70,10 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
             self.__lastMouseMoveEvent = cloneMouseEvent(self.__fbo.lastMouseMoveEvent)
             self.__lastMouseMoveEvent.ignore()
             self.__fbo.lastMouseMoveEvent.accept()
+        if self.__fbo.lastWheelEvent and not self.__fbo.lastWheelEvent.isAccepted():
+            self.__lastWheelEvent = cloneWheelEvent(self.__fbo.lastWheelEvent)
+            self.__lastWheelEvent.ignore()
+            self.__fbo.lastWheelEvent.accept()
 
     def render(self):
         if not self.__isOpenGLStateInitialized:
@@ -85,6 +86,9 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
         if self.__lastMouseMoveEvent and not self.__lastMouseMoveEvent.isAccepted():
             self.__processMouseMoveEvent(self.__lastMouseMoveEvent)
             self.__lastMouseMoveEvent.accept()
+        if self.__lastWheelEvent and not self.__lastWheelEvent.isAccepted():
+            self.__processWheelEvent(self.__lastWheelEvent)
+            self.__lastWheelEvent.accept()
 
         with self.commandQueueLock:
             while not self.commandQueue.empty():
@@ -98,6 +102,48 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
         self.rw.MakeCurrent()
         self.__glFunc.initializeOpenGLFunctions()
         self.__glFunc.glUseProgram(0)
+
+    def __processMouseButtonEvent(self, event: QMouseEvent):
+        ctrl, shift = self.__getCtrlShift(event)
+        repeat = 0
+        if event.type() == QEvent.MouseButtonDblClick:
+            repeat = 1
+
+        self.__setEventInformation(
+            event.x(), event.y(), ctrl, shift, chr(0), repeat, None
+        )
+        if (
+            event.type() == QEvent.MouseButtonPress
+            or event.type() == QEvent.MouseButtonDblClick
+        ):
+            if event.button() == Qt.LeftButton:
+                self.rwi.LeftButtonPressEvent()
+            elif event.button() == Qt.RightButton:
+                self.rwi.RightButtonPressEvent()
+            elif event.button() == Qt.MidButton:
+                self._rwInteractor.MiddleButtonPressEvent()
+        elif event.type() == QEvent.MouseButtonRelease:
+            if event.button() == Qt.LeftButton:
+                self.rwi.LeftButtonReleaseEvent()
+            elif event.button() == Qt.RightButton:
+                self.rwi.RightButtonReleaseEvent()
+            elif event.button() == Qt.MidButton:
+                self._rwInteractor.MiddleButtonReleaseEvent()
+
+    def __processMouseMoveEvent(self, event: QMouseEvent):
+        ctrl, shift = self.__getCtrlShift(event)
+        self.__setEventInformation(event.x(), event.y(), ctrl, shift, chr(0), 0, None)
+        self.rwi.MouseMoveEvent()
+
+    def __processWheelEvent(self, event: QWheelEvent):
+        ctrl, shift = self.__getCtrlShift(event)
+        self.__setEventInformation(event.x(), event.y(), ctrl, shift, chr(0), 0, None)
+
+        delta = event.delta()
+        if delta > 0:
+            self.rwi.MouseWheelForwardEvent()
+        elif delta < 0:
+            self.rwi.MouseWheelBackwardEvent()
 
     def __setEventInformation(self, x, y, ctrl, shift, key, repeat=0, keysum=None):
         scale = self.__getPixelRatio()
@@ -114,32 +160,6 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
             repeat,
             keysum,
         )
-
-    def __processMouseButtonEvent(self, event: QMouseEvent):
-        ctrl, shift = self.__getCtrlShift(event)
-        if event.type() == QEvent.MouseButtonPress:
-            repeat = 0
-            self.__setEventInformation(
-                event.x(), event.y(), ctrl, shift, chr(0), repeat, None
-            )
-            if event.button() == Qt.LeftButton:
-                self.rwi.LeftButtonPressEvent()
-            elif event.button() == Qt.RightButton:
-                self.rwi.RightButtonPressEvent()
-        elif event.type() == QEvent.MouseButtonRelease:
-            repeat = 0
-            self.__setEventInformation(
-                event.x(), event.y(), ctrl, shift, chr(0), repeat, None
-            )
-            if event.button() == Qt.LeftButton:
-                self.rwi.LeftButtonReleaseEvent()
-            elif event.button() == Qt.RightButton:
-                self.rwi.RightButtonReleaseEvent()
-
-    def __processMouseMoveEvent(self, event: QMouseEvent):
-        ctrl, shift = self.__getCtrlShift(event)
-        self.__setEventInformation(event.x(), event.y(), ctrl, shift, chr(0), 0, None)
-        self.rwi.MouseMoveEvent()
 
     def __getCtrlShift(self, event):
         ctrl = shift = False

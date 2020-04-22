@@ -29,9 +29,10 @@ class Fbo(QQuickFramebufferObject):
 
         self.lastMouseButtonEvent: QMouseEvent = None
         self.lastMouseMoveEvent: QMouseEvent = None
+        self.lastWheelEvent: QWheelEvent = None
 
         self.setAcceptedMouseButtons(Qt.AllButtons)
-        self.setAcceptHoverEvents(True)
+        self.setMirrorVertically(True)
 
     def createRenderer(self) -> QQuickFramebufferObject.Renderer:
         self.__fbo_renderer = graphics.FboRenderer()
@@ -57,6 +58,12 @@ class Fbo(QQuickFramebufferObject):
     def mouseMoveEvent(self, event: QMouseEvent):
         self.lastMouseMoveEvent = cloneMouseEvent(event)
         self.lastMouseMoveEvent.ignore()
+        event.accept()
+        self.update()
+
+    def wheelEvent(self, event: QWheelEvent):
+        self.lastWheelEvent = cloneWheelEvent(event)
+        self.lastWheelEvent.ignore()
         event.accept()
         self.update()
 
