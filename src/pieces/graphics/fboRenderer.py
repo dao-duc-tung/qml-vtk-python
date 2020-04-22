@@ -121,14 +121,14 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
             elif event.button() == Qt.RightButton:
                 self.rwi.RightButtonPressEvent()
             elif event.button() == Qt.MidButton:
-                self._rwInteractor.MiddleButtonPressEvent()
+                self.rwi.MiddleButtonPressEvent()
         elif event.type() == QEvent.MouseButtonRelease:
             if event.button() == Qt.LeftButton:
                 self.rwi.LeftButtonReleaseEvent()
             elif event.button() == Qt.RightButton:
                 self.rwi.RightButtonReleaseEvent()
             elif event.button() == Qt.MidButton:
-                self._rwInteractor.MiddleButtonReleaseEvent()
+                self.rwi.MiddleButtonReleaseEvent()
 
     def __processMouseMoveEvent(self, event: QMouseEvent):
         ctrl, shift = self.__getCtrlShift(event)

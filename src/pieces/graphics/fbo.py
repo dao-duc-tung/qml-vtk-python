@@ -2,6 +2,7 @@ from typing import List, Optional
 
 from PySide2.QtCore import (
     QEvent,
+    QPoint,
     QPointF,
     Qt,
     Slot,
@@ -107,4 +108,28 @@ class Fbo(QQuickFramebufferObject):
             Qt.KeyboardModifiers(modifiers),
         )
         self.lastMouseMoveEvent.ignore()
+        self.update()
+
+    @Slot(QPoint, int, int, int, QPoint, float, float)
+    def onMouseWheel(
+        self,
+        angleDelta: QPoint,
+        buttons: int,
+        inverted: int,
+        modifiers: int,
+        pixelDelta: QPoint,
+        x: float,
+        y: float,
+    ):
+        self.lastWheelEvent = QWheelEvent(
+            QPointF(x, y),
+            QPointF(x, y),
+            pixelDelta,
+            angleDelta,
+            Qt.MouseButtons(buttons),
+            Qt.KeyboardModifiers(modifiers),
+            Qt.NoScrollPhase,
+            bool(inverted),
+        )
+        self.lastWheelEvent.ignore()
         self.update()
