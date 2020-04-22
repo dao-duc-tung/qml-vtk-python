@@ -8,6 +8,22 @@ This project provides a solution to render VTK objects on QML-based UI.
 
 Moreover, I re-organize the architecture of the code and make it simple and scalable.
 
+The architecture can be described as below:
+
+- `MVVM pattern` is used. `Business models` are put inside `src/models` folder. `Views` are put inside `src/views` folder. `View-models` are put inside `src/ctrls` folder.
+- Data/Variables which are cached/stored while the app is running can be saved inside `Business models`.
+- Every data/variables inside `Business models` are watched. The `Business models` will emit a `Signal` if data is changed.
+- The `View-Models` will catch that `Signal` and process the data transferred along with the `Signal`.
+- The `View-Models` also expose the functions to the `Views`. These `View-Model`'s functions should change the data in `Business models`.
+- Users will call `View-Models`'s functions through UI on the `Views`.
+---
+- `Fbo` and `FboRenderer` classes support graphical rendering process.
+- src/graphics/vtkModels folder has VTK-related models which support the creation of VTK objects.
+- `ProcessingEngine` class support VTK-related models managing.
+---
+- Every graphical actions should be done inside Render Thread.
+- `Command pattern` is used to make sure those actions will be done correctly.
+
 ## Availability
 
 The code was tested using Python 3.6.6, PySide2 5.13.2 and VTK 8.1.1 (built with vtkRenderingExternal module in Release mode), VTK 8.1.2 (built without vtkRenderingExternal module in Debug mode), VTK 8.2.0 (built without vtkRenderingExternal module in Debug mode) in Windows 10.

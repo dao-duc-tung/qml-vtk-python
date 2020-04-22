@@ -15,7 +15,7 @@ from PySide2.QtQuick import QQuickFramebufferObject
 from PySide2.QtWidgets import QApplication
 
 import vtk
-from src.pieces import graphics
+from src.graphics import engines
 from src.utils import *
 
 
@@ -34,7 +34,7 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
         self.__isOpenGLStateInitialized = False
 
         self.__openGLFbo: QOpenGLFramebufferObject = None
-        self.__fbo: graphics.Fbo = None
+        self.__fbo: engines.Fbo = None
 
         self.__lastMouseButtonEvent: QMouseEvent = None
         self.__lastMouseMoveEvent: QMouseEvent = None
@@ -46,7 +46,7 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
         self.__openGLFbo = QOpenGLFramebufferObject(size, glFormat)
         return self.__openGLFbo
 
-    def synchronize(self, item: graphics.Fbo):
+    def synchronize(self, item: engines.Fbo):
         if not self.__fbo:
             self.__fbo = item
 

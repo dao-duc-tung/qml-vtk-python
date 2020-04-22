@@ -1,4 +1,4 @@
-from src.pieces.vtkModels import VtkModel
+from src.graphics.vtkModels import VtkModel
 import vtk
 
 

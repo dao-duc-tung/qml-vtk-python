@@ -8,7 +8,7 @@ from PySide2.QtQml import QQmlApplicationEngine, qmlRegisterType
 from PySide2.QtWidgets import QApplication
 import vtk
 
-from src.pieces.graphics import Fbo
+from src.graphics.engines import Fbo
 from src.ctrls import MainCtrl
 from src.utils import *
 

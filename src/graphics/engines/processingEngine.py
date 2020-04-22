@@ -1,9 +1,13 @@
 from typing import Dict
 
-from src.pieces.vtkModels import *
+from src.graphics.vtkModels import *
 
 
 class ProcessingEngine:
+    """
+    Manage VTK-related models
+    """
+
     def __init__(self):
         self.__models: Dict[str, VtkModel] = {}
 

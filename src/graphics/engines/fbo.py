@@ -11,7 +11,7 @@ from PySide2.QtGui import QMouseEvent
 from PySide2.QtQuick import QQuickFramebufferObject
 
 import vtk
-from src.pieces import graphics
+from src.graphics import engines
 from src.utils import *
 
 
@@ -26,7 +26,7 @@ class Fbo(QQuickFramebufferObject):
 
     def __init__(self):
         super().__init__()
-        self.__fboRenderer: graphics.FboRenderer = None
+        self.__fboRenderer: engines.FboRenderer = None
 
         self.lastMouseButtonEvent: QMouseEvent = None
         self.lastMouseMoveEvent: QMouseEvent = None
@@ -36,7 +36,7 @@ class Fbo(QQuickFramebufferObject):
         self.setMirrorVertically(True)
 
     def createRenderer(self) -> QQuickFramebufferObject.Renderer:
-        self.__fboRenderer = graphics.FboRenderer()
+        self.__fboRenderer = engines.FboRenderer()
         return self.__fboRenderer
 
     def addCommand(self, command: "commands.Command"):

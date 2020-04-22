@@ -1,12 +1,16 @@
 from PySide2.QtCore import QObject, QUrl, qDebug, qCritical, QFileInfo, QThread, Signal
 
-from src.pieces.graphics import *
-from src.pieces.vtkModels import *
+from src.graphics.engines import *
+from src.graphics.vtkModels import *
 from src.utils import *
 import vtk
 
 
 class MainHelper(QObject):
+    """
+    'Talk' with Graphical Render Engine through Command pattern
+    """
+
     def __init__(self, engine: ProcessingEngine, fbo: Fbo):
         super().__init__()
         self.__engine = engine

@@ -3,6 +3,10 @@ from src.utils import SingletonQObjectMeta
 
 
 class BusinessModel(QObject, metaclass=SingletonQObjectMeta):
+    """
+    Cache business data
+    """
+
     sigVisualCylinderChanged = Signal(bool)
     sigRendererColorChanged = Signal(tuple)
     sigPolyDataColorChanged = Signal(tuple)

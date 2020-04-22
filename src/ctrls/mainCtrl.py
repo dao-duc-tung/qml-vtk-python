@@ -4,7 +4,7 @@ from PySide2.QtWidgets import QApplication
 
 from src.ctrls import MainHelper
 from src.models import BusinessModel
-from src.pieces.graphics import Fbo, ProcessingEngine
+from src.graphics.engines import Fbo, ProcessingEngine
 from src.utils import getQmlObject
 
 import random
