@@ -18,7 +18,7 @@ The architecture can be described as below:
 - Users will call `View-Models`'s functions through UI on the `Views`.
 ---
 - `Fbo` and `FboRenderer` classes support graphical rendering process.
-- src/graphics/vtkModels folder has VTK-related models which support the creation of VTK objects.
+- `src/graphics/vtkModels` folder has VTK-related models which support the creation of VTK objects.
 - `ProcessingEngine` class support VTK-related models managing.
 ---
 - Every graphical actions should be done inside Render Thread.
