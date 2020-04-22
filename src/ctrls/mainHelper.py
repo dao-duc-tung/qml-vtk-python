@@ -12,10 +12,6 @@ class MainHelper(QObject):
         self.__engine = engine
         self.__fbo = fbo
 
-        self.__visual_cylinder = False
-        self.renderer_color = [0, 0, 0]
-        self.model_color = [127, 127, 0]
-
     def render(self):
         def config(*args, **kwargs):
             self.__fbo.rwi.Render()
@@ -52,7 +48,7 @@ class MainHelper(QObject):
         def config(*args, **kwargs):
             rendererModel = RendererModel(ModelName.BASE)
             renderer = rendererModel.model
-            renderer.SetBackground(self.renderer_color)
+            renderer.SetBackground(0, 0, 0)
             renderer.GradientBackgroundOn()
             renderer.ResetCameraClippingRange()
             renderer.ResetCamera()
@@ -108,11 +104,9 @@ class MainHelper(QObject):
         cmd = Cmd(callback=config)
         self.__fbo.addCommand(cmd)
 
-    def toggle_cylinder(self):
-        self.__visual_cylinder = not self.__visual_cylinder
-
+    def updateCylinderVisibility(self, visible: bool):
         def config(*args, **kwargs):
-            if self.__visual_cylinder:
+            if visible:
                 cylinderSource = vtk.vtkCylinderSource()
                 cylinderSource.SetCenter(0.0, 0.0, 0.0)
                 cylinderSource.SetRadius(5.0)
@@ -136,18 +130,16 @@ class MainHelper(QObject):
         cmd = Cmd(callback=config)
         self.__fbo.addCommand(cmd)
 
-    def updateRendererColor(self):
+    def updateRendererColor(self, color: tuple):
         def config(*args, **kwargs):
             rendererModel: RendererModel = self.__engine.getModel(ModelName.BASE)
             renderer = rendererModel.model
-            renderer.SetBackground(self.renderer_color)
+            renderer.SetBackground(color)
 
         cmd = Cmd(callback=config)
         self.__fbo.addCommand(cmd)
 
-    def updateModelColor(self):
-        color = [i / 255 for i in self.model_color]
-
+    def updateModelColor(self, color: tuple):
         def config(*args, **kwargs):
             model = self.__engine.getModel(ModelName.MESH_A)
             if model:

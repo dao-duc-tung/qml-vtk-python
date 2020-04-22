@@ -93,7 +93,7 @@ ApplicationWindow {
             anchors.top: parent.top
             anchors.leftMargin: 40
             anchors.topMargin: 40
-            onValueChanged: MainCtrl.setModelColor(0, value);
+            onValueChanged: setModelColor();
         }
 
         SpinBox {
@@ -106,7 +106,7 @@ ApplicationWindow {
             anchors.top: modelColorR.bottom
             anchors.leftMargin: 40
             anchors.topMargin: 40
-            onValueChanged: MainCtrl.setModelColor(1, value);
+            onValueChanged: setModelColor();
         }
 
         SpinBox {
@@ -119,7 +119,7 @@ ApplicationWindow {
             anchors.top: modelColorG.bottom
             anchors.leftMargin: 40
             anchors.topMargin: 40
-            onValueChanged: MainCtrl.setModelColor(2, value);
+            onValueChanged: setModelColor();
         }
 
         Label {
@@ -151,5 +151,9 @@ ApplicationWindow {
         onAccepted: {
             MainCtrl.openModel(fileUrl);
         }
+    }
+
+    function setModelColor() {
+        MainCtrl.setModelColor(modelColorR.value, modelColorG.value, modelColorB.value);
     }
 }

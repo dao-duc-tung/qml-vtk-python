@@ -3,6 +3,7 @@ from PySide2.QtQml import QQmlApplicationEngine, qmlRegisterType, QQmlEngine
 from PySide2.QtWidgets import QApplication
 
 from src.ctrls import MainHelper
+from src.models import BusinessModel
 from src.pieces.graphics import Fbo, ProcessingEngine
 from src.utils import get_qml_object
 
@@ -17,15 +18,17 @@ class MainCtrl(QObject):
         super().__init__()
         self.__engine = engine
         self.__procEngine = ProcessingEngine()
-
         self.__engine.load(QUrl.fromLocalFile(f":/main.qml"))
 
         self.__fbo = get_qml_object(self.__engine, "fbo")
         self.__hp = MainHelper(self.__procEngine, self.__fbo)
 
+        self.__businessModel = BusinessModel()
+
         self.__posX = 0.0
         self.__posY = 0.0
 
+    # * Public
     def setup(self):
         ctxt = self.__engine.rootContext()
         ctxt.setContextProperty("MainCtrl", self)
@@ -34,9 +37,16 @@ class MainCtrl(QObject):
         self.__hp.addRenderer()
         self.__hp.render()
 
-        self.sigPosXChanged.connect(self.__changeRendererColor)
-        self.sigPosYChanged.connect(self.__changeRendererColor)
+        self.sigPosXChanged.connect(self.__changeRendererColorInBusinessModel)
+        self.sigPosYChanged.connect(self.__changeRendererColorInBusinessModel)
 
+        self.__businessModel.sigVisualCylinderChanged.connect(
+            self.__updateCylinderVisibility
+        )
+        self.__businessModel.sigPolyDataColorChanged.connect(self.__updatePolyDataColor)
+        self.__businessModel.sigRendererColorChanged.connect(self.__updateRendererColor)
+
+    # * Property
     def getPosX(self):
         return self.__posX
 
@@ -57,6 +67,7 @@ class MainCtrl(QObject):
 
     posY = Property(float, fget=getPosY, fset=setPosY, notify=sigPosYChanged)
 
+    # * Slot
     @Slot(int, float, float)
     def showPos(self, buttons: int, x: float, y: float):
         self.posX = x
@@ -69,31 +80,45 @@ class MainCtrl(QObject):
         if qurl.isLocalFile():
             # Remove the "file:///" if present
             localFilePath = qurl.toLocalFile()
-        self.__hp.toggle_cylinder()
+
+        self.__businessModel.setVisualCylinder(False)
         self.__hp.addMesh(localFilePath)
-        self.__hp.updateModelColor()
+        self.__hp.updateModelColor(self.__businessModel.getPolyDataColor())
         self.__hp.focusCamera()
         self.__hp.render()
 
     @Slot()
     def toggle_cylinder(self):
-        self.__hp.toggle_cylinder()
-        self.__hp.updateModelColor()
-        self.__hp.focusCamera()
-        self.__hp.render()
+        new_val = not self.__businessModel.getVisualCylinder()
+        self.__businessModel.setVisualCylinder(new_val)
 
-    @Slot(int, int)
-    def setModelColor(self, idx: int, val: int):
-        self.__hp.model_color[idx] = val
-        self.__hp.updateModelColor()
-        self.__hp.render()
+    @Slot(int, int, int)
+    def setModelColor(self, r: int, g: int, b: int):
+        new_val = (r, g, b)
+        new_val = [i / 255 for i in new_val]
+        self.__businessModel.setPolyDataColor(new_val)
 
-    def __changeRendererColor(self):
+    # * Private
+    def __changeRendererColorInBusinessModel(self):
         temp = (self.posX + self.posY) / 2
         new_val = (self.posX, self.posY, temp)
         summ = sum(new_val)
         if summ != 0:
             summ = 1
-        self.__hp.renderer_color = [i / (sum(new_val)) for i in new_val]
-        self.__hp.updateRendererColor()
+        color = [i / (sum(new_val)) for i in new_val]
+        self.__businessModel.setRendererColor(color)
+
+    def __updateCylinderVisibility(self, val: bool):
+        self.__hp.updateCylinderVisibility(val)
+        if val:
+            self.__hp.updateModelColor(self.__businessModel.getPolyDataColor())
+        self.__hp.focusCamera()
+        self.__hp.render()
+
+    def __updatePolyDataColor(self, color: tuple):
+        self.__hp.updateModelColor(color)
+        self.__hp.render()
+
+    def __updateRendererColor(self, color: tuple):
+        self.__hp.updateRendererColor(color)
         self.__hp.render()
