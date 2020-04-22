@@ -1,7 +1,6 @@
 from PySide2.QtCore import QObject, QUrl, qDebug, qCritical, QFileInfo, QThread, Signal
 
-from src.pieces.graphics import ProcessingEngine, Fbo
-from src.pieces.commands import *
+from src.pieces.graphics import *
 from src.pieces.vtkModels import *
 from src.utils import *
 import vtk
