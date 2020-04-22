@@ -18,15 +18,15 @@ from src.utils import *
 class Fbo(QQuickFramebufferObject):
     @property
     def rw(self) -> vtk.vtkExternalOpenGLRenderWindow:
-        return self.__fbo_renderer.rw
+        return self.__fboRenderer.rw
 
     @property
     def rwi(self) -> vtk.vtkGenericRenderWindowInteractor:
-        return self.__fbo_renderer.rwi
+        return self.__fboRenderer.rwi
 
     def __init__(self):
         super().__init__()
-        self.__fbo_renderer: graphics.FboRenderer = None
+        self.__fboRenderer: graphics.FboRenderer = None
 
         self.lastMouseButtonEvent: QMouseEvent = None
         self.lastMouseMoveEvent: QMouseEvent = None
@@ -36,12 +36,12 @@ class Fbo(QQuickFramebufferObject):
         self.setMirrorVertically(True)
 
     def createRenderer(self) -> QQuickFramebufferObject.Renderer:
-        self.__fbo_renderer = graphics.FboRenderer()
-        return self.__fbo_renderer
+        self.__fboRenderer = graphics.FboRenderer()
+        return self.__fboRenderer
 
     def addCommand(self, command: "commands.Command"):
-        with self.__fbo_renderer.commandQueueLock:
-            self.__fbo_renderer.commandQueue.put(command)
+        with self.__fboRenderer.commandQueueLock:
+            self.__fboRenderer.commandQueue.put(command)
         self.update()
 
     def mousePressEvent(self, event: QMouseEvent):

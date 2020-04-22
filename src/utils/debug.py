@@ -2,14 +2,14 @@ import os
 import traceback
 
 
-def except_hook(err_type, err_msg, err_traceback):
+def exceptHook(errType, errMsg, errTraceback):
     error = dict()
-    error["type"] = err_type.__name__
-    error["message"] = str(err_msg)
+    error["type"] = errType.__name__
+    error["message"] = str(errMsg)
     try:
-        error["file"] = os.path.split(err_traceback.tb_frame.f_code.co_filename)[1]
-        error["line"] = err_traceback.tb_lineno
-        error["traceback"] = "".join(traceback.format_tb(err_traceback))
+        error["file"] = os.path.split(errTraceback.tb_frame.f_code.co_filename)[1]
+        error["line"] = errTraceback.tb_lineno
+        error["traceback"] = "".join(traceback.format_tb(errTraceback))
     except AttributeError:
         pass
     print("ERROR:")

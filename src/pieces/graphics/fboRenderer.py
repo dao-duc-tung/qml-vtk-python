@@ -41,9 +41,9 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
         self.__lastWheelEvent: QWheelEvent = None
 
     def createFramebufferObject(self, size: QSize) -> QOpenGLFramebufferObject:
-        gl_format = QOpenGLFramebufferObjectFormat()
-        gl_format.setAttachment(QOpenGLFramebufferObject.CombinedDepthStencil)
-        self.__openGLFbo = QOpenGLFramebufferObject(size, gl_format)
+        glFormat = QOpenGLFramebufferObjectFormat()
+        glFormat.setAttachment(QOpenGLFramebufferObject.CombinedDepthStencil)
+        self.__openGLFbo = QOpenGLFramebufferObject(size, glFormat)
         return self.__openGLFbo
 
     def synchronize(self, item: graphics.Fbo):

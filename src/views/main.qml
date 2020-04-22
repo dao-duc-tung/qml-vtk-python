@@ -67,7 +67,7 @@ ApplicationWindow {
             anchors.bottom: parent.bottom
             anchors.margins: 30
             onClicked: {
-                MainCtrl.toggle_cylinder();
+                MainCtrl.toggleCylinder();
             }
         }
 

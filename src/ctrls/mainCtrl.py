@@ -5,7 +5,7 @@ from PySide2.QtWidgets import QApplication
 from src.ctrls import MainHelper
 from src.models import BusinessModel
 from src.pieces.graphics import Fbo, ProcessingEngine
-from src.utils import get_qml_object
+from src.utils import getQmlObject
 
 import random
 
@@ -20,7 +20,7 @@ class MainCtrl(QObject):
         self.__procEngine = ProcessingEngine()
         self.__engine.load(QUrl.fromLocalFile(f":/main.qml"))
 
-        self.__fbo = get_qml_object(self.__engine, "fbo")
+        self.__fbo = getQmlObject(self.__engine, "fbo")
         self.__hp = MainHelper(self.__procEngine, self.__fbo)
 
         self.__businessModel = BusinessModel()
@@ -88,24 +88,24 @@ class MainCtrl(QObject):
         self.__hp.render()
 
     @Slot()
-    def toggle_cylinder(self):
-        new_val = not self.__businessModel.getVisualCylinder()
-        self.__businessModel.setVisualCylinder(new_val)
+    def toggleCylinder(self):
+        newVal = not self.__businessModel.getVisualCylinder()
+        self.__businessModel.setVisualCylinder(newVal)
 
     @Slot(int, int, int)
     def setModelColor(self, r: int, g: int, b: int):
-        new_val = (r, g, b)
-        new_val = [i / 255 for i in new_val]
-        self.__businessModel.setPolyDataColor(new_val)
+        newVal = (r, g, b)
+        newVal = [i / 255 for i in newVal]
+        self.__businessModel.setPolyDataColor(newVal)
 
     # * Private
     def __changeRendererColorInBusinessModel(self):
         temp = (self.posX + self.posY) / 2
-        new_val = (self.posX, self.posY, temp)
-        summ = sum(new_val)
+        newVal = (self.posX, self.posY, temp)
+        summ = sum(newVal)
         if summ != 0:
             summ = 1
-        color = [i / (sum(new_val)) for i in new_val]
+        color = [i / (sum(newVal)) for i in newVal]
         self.__businessModel.setRendererColor(color)
 
     def __updateCylinderVisibility(self, val: bool):

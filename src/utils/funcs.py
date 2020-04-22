@@ -32,21 +32,19 @@ else:
     raise NotImplementedError
 
 
-def compile_resource_files(rc_dir, out_dir):
-    for root, dirs, files in os.walk(rc_dir):
+def compileResourceFiles(rcDir, outDir):
+    for root, dirs, files in os.walk(rcDir):
         for basename in files:
             pattern = "*.qrc"
             if fnmatch.fnmatch(basename, pattern):
-                name_str, ext = os.path.splitext(basename)
-                rc_file_path = os.path.join(root, basename)
-                if out_dir:
-                    py_file_path = os.path.join(out_dir, "rc_" + name_str + ".py")
+                nameStr, ext = os.path.splitext(basename)
+                rcFilePath = os.path.join(root, basename)
+                if outDir:
+                    pyFilePath = os.path.join(outDir, "rc_" + nameStr + ".py")
                 else:
-                    py_file_path = os.path.join(root, "rc_" + name_str + ".py")
-                cmd_string = "{0} {1} -o {2}".format(
-                    PYSIDE2_RCC, rc_file_path, py_file_path
-                )
-                os.system(cmd_string)
+                    pyFilePath = os.path.join(root, "rc_" + nameStr + ".py")
+                cmdStr = "{0} {1} -o {2}".format(PYSIDE2_RCC, rcFilePath, pyFilePath)
+                os.system(cmdStr)
 
 
 def cloneMouseEvent(event: QMouseEvent):
@@ -86,25 +84,25 @@ def convertToMouseEvent(
     return QMouseEvent(eventType, localPos, button, buttons, modifiers)
 
 
-def get_qml_object(qml_engine, object_name, parent_object=None):
-    reference_buffer = []
-    if parent_object is None:
-        for root_object in qml_engine.rootObjects():
-            if root_object.property("objectName") == object_name:
+def getQmlObject(qmlEngine, objectName, parentObj=None):
+    referenceBuffer = []
+    if parentObj is None:
+        for root_object in qmlEngine.rootObjects():
+            if root_object.property("objectName") == objectName:
                 return root_object
-            obj = root_object.findChild(QObject, object_name)
+            obj = root_object.findChild(QObject, objectName)
             if obj is not None:
-                reference_buffer.append(obj)
+                referenceBuffer.append(obj)
                 return obj
     else:
-        obj = parent_object.findChild(QObject, object_name)
+        obj = parentObj.findChild(QObject, objectName)
         if obj is not None:
-            reference_buffer.append(obj)
+            referenceBuffer.append(obj)
             return obj
     return None
 
 
-def setDefaultSurfaceFormat(stereo_capable):
+def setDefaultSurfaceFormat(stereoCapable):
     """ Ported from: https://github.com/Kitware/VTK/blob/master/GUISupport/Qt/QVTKRenderWindowAdapter.cxx
     """
     fmt = QSurfaceFormat()
@@ -118,7 +116,7 @@ def setDefaultSurfaceFormat(stereo_capable):
     fmt.setDepthBufferSize(8)
     fmt.setAlphaBufferSize(8)
     fmt.setStencilBufferSize(0)
-    fmt.setStereo(stereo_capable)
+    fmt.setStereo(stereoCapable)
     fmt.setSamples(0)
 
     return fmt
