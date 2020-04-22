@@ -44,6 +44,13 @@ conda install -c conda-forge pyside2 # Linux
 pip install PySide2 # Windows
 ```
 
+In Windows, you might need configure the some environment variables in your Conda environment:
+
+```shell
+export QT_PLUGIN_PATH="path/to/site-packages/PySide2/plugins"
+export QML2_IMPORT_PATH="path/to/site-packages/PySide2/qml"
+```
+
 ## Update
 
 ### 22/04/2020
