@@ -3,7 +3,7 @@ import os
 import sys
 
 from PySide2.QtCore import QEvent, QObject, QPointF, Qt
-from PySide2.QtGui import QMouseEvent, QWheelEvent
+from PySide2.QtGui import QMouseEvent, QWheelEvent, QSurfaceFormat
 
 if sys.platform == "win32":
     try:
@@ -102,3 +102,23 @@ def get_qml_object(qml_engine, object_name, parent_object=None):
             reference_buffer.append(obj)
             return obj
     return None
+
+
+def setDefaultSurfaceFormat(stereo_capable):
+    """ Ported from: https://github.com/Kitware/VTK/blob/master/GUISupport/Qt/QVTKRenderWindowAdapter.cxx
+    """
+    fmt = QSurfaceFormat()
+    fmt.setRenderableType(QSurfaceFormat.OpenGL)
+    fmt.setVersion(3, 2)
+    fmt.setProfile(QSurfaceFormat.CoreProfile)
+    fmt.setSwapBehavior(QSurfaceFormat.DoubleBuffer)
+    fmt.setRedBufferSize(8)
+    fmt.setGreenBufferSize(8)
+    fmt.setBlueBufferSize(8)
+    fmt.setDepthBufferSize(8)
+    fmt.setAlphaBufferSize(8)
+    fmt.setStencilBufferSize(0)
+    fmt.setStereo(stereo_capable)
+    fmt.setSamples(0)
+
+    return fmt

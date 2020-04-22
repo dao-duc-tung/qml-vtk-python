@@ -61,6 +61,7 @@ class App(QApplication):
 def main():
     register_custom_qml_object()
     compile_qml()
+    QSurfaceFormat.setDefaultFormat(setDefaultSurfaceFormat(False))
 
     app = App(sys.argv)
 
