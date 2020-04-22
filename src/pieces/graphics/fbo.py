@@ -2,6 +2,7 @@ from typing import List, Optional
 
 from PySide2.QtCore import (
     QEvent,
+    QPoint,
     QPointF,
     Qt,
     Slot,
@@ -29,9 +30,10 @@ class Fbo(QQuickFramebufferObject):
 
         self.lastMouseButtonEvent: QMouseEvent = None
         self.lastMouseMoveEvent: QMouseEvent = None
+        self.lastWheelEvent: QWheelEvent = None
 
         self.setAcceptedMouseButtons(Qt.AllButtons)
-        self.setAcceptHoverEvents(True)
+        self.setMirrorVertically(True)
 
     def createRenderer(self) -> QQuickFramebufferObject.Renderer:
         self.__fbo_renderer = graphics.FboRenderer()
@@ -57,6 +59,12 @@ class Fbo(QQuickFramebufferObject):
     def mouseMoveEvent(self, event: QMouseEvent):
         self.lastMouseMoveEvent = cloneMouseEvent(event)
         self.lastMouseMoveEvent.ignore()
+        event.accept()
+        self.update()
+
+    def wheelEvent(self, event: QWheelEvent):
+        self.lastWheelEvent = cloneWheelEvent(event)
+        self.lastWheelEvent.ignore()
         event.accept()
         self.update()
 
@@ -100,4 +108,28 @@ class Fbo(QQuickFramebufferObject):
             Qt.KeyboardModifiers(modifiers),
         )
         self.lastMouseMoveEvent.ignore()
+        self.update()
+
+    @Slot(QPoint, int, int, int, QPoint, float, float)
+    def onMouseWheel(
+        self,
+        angleDelta: QPoint,
+        buttons: int,
+        inverted: int,
+        modifiers: int,
+        pixelDelta: QPoint,
+        x: float,
+        y: float,
+    ):
+        self.lastWheelEvent = QWheelEvent(
+            QPointF(x, y),
+            QPointF(x, y),
+            pixelDelta,
+            angleDelta,
+            Qt.MouseButtons(buttons),
+            Qt.KeyboardModifiers(modifiers),
+            Qt.NoScrollPhase,
+            bool(inverted),
+        )
+        self.lastWheelEvent.ignore()
         self.update()

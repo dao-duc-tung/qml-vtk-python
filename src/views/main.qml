@@ -30,17 +30,31 @@ ApplicationWindow {
                 acceptedButtons: Qt.AllButtons
                 propagateComposedEvents: true
 
-                onPressed: {
+                onPressed: (mouse) => {
                     mouse.accepted = true;
                     this.parent.onMousePressed(
                         mouse.x, mouse.y, mouse.button,
                         mouse.buttons, mouse.modifiers);
                     MainCtrl.showPos(mouse.buttons, mouseX, mouseY);
                 }
-                onPositionChanged: {
+
+                onPositionChanged: (mouse) => {
                     this.parent.onMouseMove(mouse.x, mouse.y, mouse.button,
-                                            mouse.buttons, mouse.modifiers)
+                                            mouse.buttons, mouse.modifiers);
                     MainCtrl.showPos(mouse.buttons, mouseX, mouseY);
+                }
+
+                onWheel: (wheel) => {
+                    this.parent.onMouseWheel(wheel.angleDelta, wheel.buttons,
+                                     wheel.inverted, wheel.modifiers,
+                                     wheel.pixelDelta, wheel.x, wheel.y);
+
+                    if (wheel.angleDelta.y < 0){
+                        modelColorR.value -= 10;
+                    }
+                    else {
+                        modelColorR.value += 10;
+                    }
                 }
             }
         }

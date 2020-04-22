@@ -1,27 +1,21 @@
-import os, sys
 import logging
+import os
+import sys
 
-from PySide2.QtCore import (
-    Qt,
-    QObject,
-    QUrl,
-    qDebug,
-    qCritical,
-    Signal,
-    Property,
-    Slot,
-    qInstallMessageHandler,
-    QTimer,
-)
+from PySide2.QtCore import Qt, QTimer, Signal
+from PySide2.QtGui import QSurfaceFormat
 from PySide2.QtQml import QQmlApplicationEngine, qmlRegisterType
 from PySide2.QtWidgets import QApplication
+import vtk
+
+from src.pieces.graphics import Fbo
+from src.ctrls import MainCtrl
+from src.utils import *
 
 logging.basicConfig(filename="log.ini", level=logging.DEBUG)
 
 
 def set_vtk_log():
-    import vtk
-
     log_path = os.path.join("log.ini")
     fow = vtk.vtkFileOutputWindow()
     fow.SetFileName(log_path)
@@ -30,8 +24,6 @@ def set_vtk_log():
 
 
 def register_custom_qml_object():
-    from src.pieces.graphics import Fbo
-
     qmlRegisterType(Fbo, "QmlVtk", 1, 0, "Fbo")
 
 
@@ -52,15 +44,10 @@ class App(QApplication):
         sys_argv += ["-style", "material"]  #! MUST HAVE
         super(App, self).__init__(sys_argv)
         self.engine = QQmlApplicationEngine()
-
-        from src.ctrls import MainCtrl
-
         self.__mainCtrl = MainCtrl(self.engine)
 
     def postprocess_signal_binding(self):
         def postprocess():
-            from src.utils import get_qml_object
-
             mainView = get_qml_object(self.engine, "MainView")
             if mainView.property("active"):
                 self.__mainCtrl.setup()
@@ -78,7 +65,7 @@ def main():
     app = App(sys.argv)
 
     if len(app.engine.rootObjects()) == 0:
-        print("No QML file is loaded. Application Exit!")
+        print("No QML file is loaded!")
         return
 
     QTimer.singleShot(0, app.postprocess_signal_binding)
@@ -87,8 +74,6 @@ def main():
 
 if __name__ == "__main__":
     set_vtk_log()
-
-    from src.utils import except_hook
 
     sys.excepthook = except_hook
 

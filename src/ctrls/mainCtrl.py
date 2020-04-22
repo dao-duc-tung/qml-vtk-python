@@ -2,7 +2,7 @@ from PySide2.QtCore import QObject, QUrl, Signal, Property, Slot
 from PySide2.QtQml import QQmlApplicationEngine, qmlRegisterType, QQmlEngine
 from PySide2.QtWidgets import QApplication
 
-from src.ctrls.visual import MainHelper
+from src.ctrls import MainHelper
 from src.pieces.graphics import Fbo, ProcessingEngine
 from src.utils import get_qml_object
 
@@ -91,6 +91,9 @@ class MainCtrl(QObject):
     def __changeRendererColor(self):
         temp = (self.posX + self.posY) / 2
         new_val = (self.posX, self.posY, temp)
+        summ = sum(new_val)
+        if summ != 0:
+            summ = 1
         self.__hp.renderer_color = [i / (sum(new_val)) for i in new_val]
         self.__hp.updateRendererColor()
         self.__hp.render()

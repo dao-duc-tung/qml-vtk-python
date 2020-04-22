@@ -1,26 +1,9 @@
-import os, fnmatch, sys
+import fnmatch
+import os
+import sys
 
-from PySide2.QtCore import (
-    QSize,
-    qDebug,
-    Qt,
-    QEvent,
-    QObject,
-    Slot,
-    QPointF,
-    QPoint,
-    Signal,
-)
-from PySide2.QtGui import (
-    QOpenGLFramebufferObject,
-    QOpenGLFramebufferObjectFormat,
-    QOpenGLFunctions,
-    QMouseEvent,
-    QHoverEvent,
-    QWheelEvent,
-    QKeyEvent,
-    QCursor,
-)
+from PySide2.QtCore import QEvent, QObject, QPointF, Qt
+from PySide2.QtGui import QMouseEvent, QWheelEvent
 
 if sys.platform == "win32":
     try:
@@ -75,6 +58,20 @@ def cloneMouseEvent(event: QMouseEvent):
         event.button(),
         event.buttons(),
         event.modifiers(),
+        event.source(),
+    )
+
+
+def cloneWheelEvent(event: QWheelEvent):
+    return QWheelEvent(
+        event.posF(),
+        event.globalPosF(),
+        event.pixelDelta(),
+        event.angleDelta(),
+        event.buttons(),
+        event.modifiers(),
+        event.phase(),
+        event.inverted(),
         event.source(),
     )
 
