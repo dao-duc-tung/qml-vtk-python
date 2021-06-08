@@ -17,7 +17,7 @@ from src.utils import *
 
 class Fbo(QQuickFramebufferObject):
     @property
-    def rw(self) -> vtk.vtkExternalOpenGLRenderWindow:
+    def rw(self) -> vtk.vtkGenericOpenGLRenderWindow:
         return self.__fboRenderer.rw
 
     @property
