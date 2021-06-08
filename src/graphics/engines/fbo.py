@@ -16,14 +16,6 @@ from src.utils import *
 
 
 class Fbo(QQuickFramebufferObject):
-    @property
-    def rw(self) -> vtk.vtkGenericOpenGLRenderWindow:
-        return self.__fboRenderer.rw
-
-    @property
-    def rwi(self) -> vtk.vtkGenericRenderWindowInteractor:
-        return self.__fboRenderer.rwi
-
     def __init__(self):
         super().__init__()
         self.__fboRenderer: engines.FboRenderer = None
@@ -34,6 +26,19 @@ class Fbo(QQuickFramebufferObject):
 
         self.setAcceptedMouseButtons(Qt.AllButtons)
         self.setMirrorVertically(True)
+
+    def render(self):
+        self.__fboRenderer.rwi.Render()
+
+    def addRenderer(self, renderer: vtk.vtkRenderer):
+        self.__fboRenderer.rw.AddRenderer(renderer)
+
+    def setInteractorStyle(self, interactorStyle: vtk.vtkInteractorStyle):
+        self.__fboRenderer.rwi.SetInteractorStyle(interactorStyle)
+
+    def initRWI(self):
+        self.__fboRenderer.rwi.Initialize()
+        self.__fboRenderer.rwi.Start()
 
     def createRenderer(self) -> QQuickFramebufferObject.Renderer:
         self.__fboRenderer = engines.FboRenderer()
