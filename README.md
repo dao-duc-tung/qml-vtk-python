@@ -27,7 +27,7 @@ The architecture can be described as below:
 ## Compatibility
 
 The code was tested by using Anaconda3 and the following combinations:
-- Python 3.6.6 + PySide2 5.13.2 + VTK 8.1.1/8.1.2/VTK 8.2.0 (built from source) + Ubuntu 16.04/Windows 10
+- Python 3.6.6 + PySide2 5.13.2 + VTK 8.1.1/8.1.2/8.2.0 (built from source) + Ubuntu 16.04/Windows 10
 - Python 3.7.10 + PySide2 5.13.2 + VTK 8.1.2 (from [pypi](https://pypi.org/project/vtk))
 - Python 3.7.5 + PySide2 5.13.1 + VTK 8.2 [Thanks szmurlor](https://github.com/szmurlor/QtVTK-Py)
 
