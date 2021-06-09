@@ -10,7 +10,7 @@ Moreover, I re-organize the architecture of the code and make it simple and scal
 
 The architecture can be described as below:
 
-- [`MVVM`](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93viewmodel) architectural is used. `Model` is put inside `src/model` folder. `View` is put inside `src/view` folder. `ViewModel` is put inside `src/ctrls` folder.
+- [`MVVM`](https://en.wikipedia.org/wiki/Model%E2%80%93view%E2%80%93viewmodel) architectural pattern is used. `Model` is put inside `src/model` folder. `View` is put inside `src/view` folder. `ViewModel` is put inside `src/ctrls` folder.
 - Data/Variables which are cached/stored the app states should be saved in `Model` which is implemented [`Singleton`](https://en.wikipedia.org/wiki/Singleton_pattern) design pattern.
 - The `Model` will emit a `Signal` if data is changed.
 - The `ViewModel` will catch that `Signal` and pass the data along with the `Signal` as the parameter.
