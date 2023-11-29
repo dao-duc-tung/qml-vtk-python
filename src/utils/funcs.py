@@ -9,8 +9,8 @@ from PySide6.QtGui import QMouseEvent, QWheelEvent, QSurfaceFormat
 if sys.platform == "win32":
     try:
         PY_EXE_PATH = os.path.dirname(sys.executable)
-        PYSIDE2_RCC = os.path.join(PY_EXE_PATH, "pyside6-rcc.exe")
-        assert os.path.exists(PYSIDE2_RCC)
+        PYSIDE6_RCC = os.path.join(PY_EXE_PATH, "pyside6-rcc.exe")
+        assert os.path.exists(PYSIDE6_RCC)
     except AssertionError:
         print("PySide6 is not found! PySide6 may be installed on Anaconda!")
         try:
@@ -19,14 +19,14 @@ if sys.platform == "win32":
             PYSIDE2_PKG_PATH = os.path.abspath(
                 os.path.join(PySide6.__file__, os.pardir)
             )
-            PYSIDE2_RCC = os.path.join(PYSIDE2_PKG_PATH, "pyside6-rcc.exe")
+            PYSIDE6_RCC = os.path.join(PYSIDE2_PKG_PATH, "pyside6-rcc.exe")
         except ImportError:
             print("PySide6 is not installed! Please install PySide6 first.")
 elif sys.platform == "linux":
     try:
         PY_EXE_PATH = os.path.dirname(sys.executable)
-        PYSIDE2_RCC = os.path.join(PY_EXE_PATH, "pyside6-rcc")
-        assert os.path.exists(PYSIDE2_RCC)
+        PYSIDE6_RCC = os.path.join(PY_EXE_PATH, "pyside6-rcc")
+        assert os.path.exists(PYSIDE6_RCC)
     except AssertionError:
         print("pyside6-rcc is not found!")
 else:
@@ -44,7 +44,7 @@ def compileResourceFiles(rcDir, outDir):
                     pyFilePath = os.path.join(outDir, "rc_" + nameStr + ".py")
                 else:
                     pyFilePath = os.path.join(root, "rc_" + nameStr + ".py")
-                cmdStr = "{0} {1} -o {2}".format(PYSIDE2_RCC, rcFilePath, pyFilePath)
+                cmdStr = "{0} {1} -o {2}".format(PYSIDE6_RCC, rcFilePath, pyFilePath)
                 os.system(cmdStr)
 
 def cloneMouseEvent(event: QMouseEvent):

@@ -97,7 +97,7 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
                 cmd = self.commandQueue.get()
                 cmd.execute()
 
-        self.__fbo.window().resetOpenGLState()
+        # self.__fbo.window().resetOpenGLState()
 
     def __openGLInitState(self):
         self.rw.OpenGLInitState()

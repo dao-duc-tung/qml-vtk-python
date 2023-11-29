@@ -20,6 +20,13 @@ class MainCtrl(QObject):
         super().__init__()
         self.__engine = engine
         self.__procEngine = ProcessingEngine()
+
+        self.__posX = 0.0
+        self.__posY = 0.0
+
+        ctxt = self.__engine.rootContext()
+        ctxt.setContextProperty("MainCtrl", self)
+
         self.__engine.load(QUrl.fromLocalFile(f":/main.qml"))
 
         self.__fbo = getQmlObject(self.__engine, "fbo")
@@ -27,14 +34,8 @@ class MainCtrl(QObject):
 
         self.__businessModel = BusinessModel()
 
-        self.__posX = 0.0
-        self.__posY = 0.0
-
     # * Public
     def setup(self):
-        ctxt = self.__engine.rootContext()
-        ctxt.setContextProperty("MainCtrl", self)
-
         self.__hp.addInteractorStyle()
         self.__hp.addRenderer()
         self.__hp.render()

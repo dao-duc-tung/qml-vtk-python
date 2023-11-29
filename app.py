@@ -40,7 +40,10 @@ def compileQml():
 
 class App(QApplication):
     def __init__(self, sys_argv):
-        sys_argv += ["-style", "material"]  #! MUST HAVE
+        if sys.platform == "win32":
+            sys_argv += ["-style", "material"]  #! MUST HAVE
+        elif sys.platform == "linux":
+            sys_argv += ["-style", "Fusion"]  # ! MUST HAVE
         super(App, self).__init__(sys_argv)
         self.engine = QQmlApplicationEngine()
         self.__mainCtrl = MainCtrl(self.engine)

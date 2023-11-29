@@ -16,10 +16,6 @@ Window {
     Material.primary: Material.Indigo
     Material.accent: Material.LightBlue
 
-    Component.onCompleted: {
-        console.log("loaded")
-    }
-
     Rectangle {
         id: screenCanvasUI
         anchors.fill: parent
@@ -150,7 +146,6 @@ Window {
         visible: false
         title: "Import model"
         nameFilters: ["Mesh files" + "(*.stl *.STL *.obj *.OBJ)", "All files" + "(*)"]
-
         onAccepted: {
             MainCtrl.openModel(fileUrl);
         }
