@@ -12,7 +12,6 @@ from src.utils import getQmlObject
 
 import random
 
-
 class MainCtrl(QObject):
     sigPosXChanged = Signal(float)
     sigPosYChanged = Signal(float)
@@ -21,10 +20,7 @@ class MainCtrl(QObject):
         super().__init__()
         self.__engine = engine
         self.__procEngine = ProcessingEngine()
-
-        qml_file = Path(__file__).resolve().parent.parent / "views/main.qml"
-        qml_file_str = os.path.abspath(qml_file)
-        self.__engine.load(QUrl.fromLocalFile(qml_file_str))
+        self.__engine.load(QUrl.fromLocalFile(f":/main.qml"))
 
         self.__fbo = getQmlObject(self.__engine, "fbo")
         self.__hp = MainHelper(self.__procEngine, self.__fbo)

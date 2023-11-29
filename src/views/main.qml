@@ -1,11 +1,11 @@
-import QtQuick 2.9
-import QtQuick.Controls 2.2
-import QtQuick.Dialogs 1.2
-import QtQuick.Window 2.3
-import QtQuick.Controls.Material 2.2
+import QtQuick
+import QtQuick.Controls
+import QtQuick.Dialogs
+import QtQuick.Window
+import QtQuick.Controls.Material
 import QmlVtk 1.0
 
-ApplicationWindow {
+Window {
     id: root
     objectName: 'MainView'
     minimumWidth: 1024
@@ -15,6 +15,10 @@ ApplicationWindow {
 
     Material.primary: Material.Indigo
     Material.accent: Material.LightBlue
+
+    Component.onCompleted: {
+        console.log("loaded")
+    }
 
     Rectangle {
         id: screenCanvasUI
@@ -145,7 +149,6 @@ ApplicationWindow {
         id: fileDialog
         visible: false
         title: "Import model"
-        folder: shortcuts.documents
         nameFilters: ["Mesh files" + "(*.stl *.STL *.obj *.OBJ)", "All files" + "(*)"]
 
         onAccepted: {
