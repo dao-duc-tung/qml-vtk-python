@@ -8,7 +8,7 @@ from PySide2.QtGui import QMouseEvent, QWheelEvent, QSurfaceFormat
 if sys.platform == "win32":
     try:
         PY_EXE_PATH = os.path.dirname(sys.executable)
-        PYSIDE2_RCC = os.path.join(PY_EXE_PATH, "Scripts", "pyside2-rcc.exe")
+        PYSIDE2_RCC = os.path.join(PY_EXE_PATH, "Scripts", "rcc.exe")
         assert os.path.exists(PYSIDE2_RCC)
     except AssertionError:
         print("PySide2 is not found! PySide2 may be installed on Anaconda!")
@@ -18,7 +18,7 @@ if sys.platform == "win32":
             PYSIDE2_PKG_PATH = os.path.abspath(
                 os.path.join(PySide2.__file__, os.pardir)
             )
-            PYSIDE2_RCC = os.path.join(PYSIDE2_PKG_PATH, "pyside2-rcc.exe")
+            PYSIDE2_RCC = os.path.join(PYSIDE2_PKG_PATH, "rcc.exe")
         except ImportError:
             print("PySide2 is not installed! Please install PySide2 first.")
 elif sys.platform == "linux":
