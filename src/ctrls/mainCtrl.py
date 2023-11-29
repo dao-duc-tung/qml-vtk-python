@@ -1,3 +1,6 @@
+import os.path
+from pathlib import Path
+
 from PySide2.QtCore import QObject, QUrl, Signal, Property, Slot
 from PySide2.QtQml import QQmlApplicationEngine, qmlRegisterType, QQmlEngine
 from PySide2.QtWidgets import QApplication
@@ -18,7 +21,10 @@ class MainCtrl(QObject):
         super().__init__()
         self.__engine = engine
         self.__procEngine = ProcessingEngine()
-        self.__engine.load(QUrl.fromLocalFile(f":/main.qml"))
+
+        qml_file = Path(__file__).resolve().parent.parent / "views/main.qml"
+        qml_file_str = os.path.abspath(qml_file)
+        self.__engine.load(QUrl.fromLocalFile(qml_file_str))
 
         self.__fbo = getQmlObject(self.__engine, "fbo")
         self.__hp = MainHelper(self.__procEngine, self.__fbo)

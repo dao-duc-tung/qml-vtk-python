@@ -27,16 +27,6 @@ def registerCustomQml():
     qmlRegisterType(Fbo, "QmlVtk", 1, 0, "Fbo")
 
 
-def compileQml():
-    from src.utils import compileResourceFiles
-
-    compileResourceFiles(rcDir="src/views", outDir="src/views")
-    if os.path.isfile(os.path.join("src/views/rc_qml.py")):
-        from src.views.rc_qml import qInitResources
-
-        qInitResources()
-
-
 class App(QApplication):
     def __init__(self, sys_argv):
         sys_argv += ["-style", "material"]  #! MUST HAVE
@@ -54,7 +44,6 @@ class App(QApplication):
 
 def main():
     registerCustomQml()
-    compileQml()
     QSurfaceFormat.setDefaultFormat(setDefaultSurfaceFormat(False))
 
     app = App(sys.argv)
