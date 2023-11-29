@@ -34,6 +34,7 @@ wheels/
 *.egg
 MANIFEST
 venv/
+venv311/
 .idea/
 
 # PyInstaller

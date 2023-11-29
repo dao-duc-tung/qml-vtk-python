@@ -2,8 +2,8 @@ import fnmatch
 import os
 import sys
 
-from PySide2.QtCore import QEvent, QObject, QPointF, Qt
-from PySide2.QtGui import QMouseEvent, QWheelEvent, QSurfaceFormat
+from PySide6.QtCore import QEvent, QObject, QPointF, Qt
+from PySide6.QtGui import QMouseEvent, QWheelEvent, QSurfaceFormat
 
 
 def cloneMouseEvent(event: QMouseEvent):

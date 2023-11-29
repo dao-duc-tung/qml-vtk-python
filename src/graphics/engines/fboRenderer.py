@@ -2,17 +2,16 @@ from queue import Queue
 from threading import Lock
 from typing import List, Optional
 
-from PySide2.QtCore import QEvent, QObject, QSize, Qt
-from PySide2.QtGui import (
+from PySide6.QtCore import QEvent, QObject, QSize, Qt
+from PySide6.QtGui import (
     QCursor,
     QMouseEvent,
-    QOpenGLFramebufferObject,
-    QOpenGLFramebufferObjectFormat,
     QOpenGLFunctions,
     QWheelEvent,
 )
-from PySide2.QtQuick import QQuickFramebufferObject
-from PySide2.QtWidgets import QApplication
+from PySide6.QtOpenGL import QOpenGLFramebufferObject, QOpenGLFramebufferObjectFormat
+from PySide6.QtQuick import QQuickFramebufferObject
+from PySide6.QtWidgets import QApplication
 
 import vtk
 from src.graphics import engines

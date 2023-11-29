@@ -2,10 +2,10 @@ import logging
 import os
 import sys
 
-from PySide2.QtCore import Qt, QTimer, Signal
-from PySide2.QtGui import QSurfaceFormat
-from PySide2.QtQml import QQmlApplicationEngine, qmlRegisterType
-from PySide2.QtWidgets import QApplication
+from PySide6.QtCore import Qt, QTimer, Signal
+from PySide6.QtGui import QSurfaceFormat
+from PySide6.QtQml import QQmlApplicationEngine, qmlRegisterType
+from PySide6.QtWidgets import QApplication
 import vtk
 
 from src.graphics.engines import Fbo

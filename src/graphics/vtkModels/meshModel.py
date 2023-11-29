@@ -1,5 +1,5 @@
 import vtk
-from PySide2.QtCore import QFileInfo, QUrl
+from PySide6.QtCore import QFileInfo, QUrl
 
 from .polyDataModel import PolyDataModel
 

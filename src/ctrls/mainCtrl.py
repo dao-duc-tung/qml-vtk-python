@@ -1,9 +1,9 @@
 import os.path
 from pathlib import Path
 
-from PySide2.QtCore import QObject, QUrl, Signal, Property, Slot
-from PySide2.QtQml import QQmlApplicationEngine, qmlRegisterType, QQmlEngine
-from PySide2.QtWidgets import QApplication
+from PySide6.QtCore import QObject, QUrl, Signal, Property, Slot
+from PySide6.QtQml import QQmlApplicationEngine, qmlRegisterType, QQmlEngine
+from PySide6.QtWidgets import QApplication
 
 from src.ctrls import MainHelper
 from src.models import BusinessModel

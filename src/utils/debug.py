@@ -14,7 +14,7 @@ def exceptHook(errType, errMsg, errTraceback):
         pass
     print("ERROR:")
     for k, v in error.items():
-        if k is "traceback":
+        if k == "traceback":
             print("{}:\n{}".format(k.title(), v))
         else:
             print("{}: {}".format(k.title(), v))
