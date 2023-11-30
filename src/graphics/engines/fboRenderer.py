@@ -111,9 +111,7 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
         if event.type() == QEvent.MouseButtonDblClick:
             repeat = 1
 
-        self.__setEventInformation(
-            event.x(), event.y(), ctrl, shift, chr(0), repeat, None
-        )
+        self.__setEventInformation(event.position(), ctrl, shift, chr(0), repeat, None)
         if (
             event.type() == QEvent.MouseButtonPress
             or event.type() == QEvent.MouseButtonDblClick
@@ -134,24 +132,25 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
 
     def __processMouseMoveEvent(self, event: QMouseEvent):
         ctrl, shift = self.__getCtrlShift(event)
-        self.__setEventInformation(event.x(), event.y(), ctrl, shift, chr(0), 0, None)
+        self.__setEventInformation(event.position(), ctrl, shift, chr(0), 0, None)
         self.rwi.MouseMoveEvent()
 
     def __processWheelEvent(self, event: QWheelEvent):
         ctrl, shift = self.__getCtrlShift(event)
-        self.__setEventInformation(event.x(), event.y(), ctrl, shift, chr(0), 0, None)
+        self.__setEventInformation(event.position(), ctrl, shift, chr(0), 0, None)
 
-        delta = event.delta()
+        delta = event.angleDelta().y()
         if delta > 0:
             self.rwi.MouseWheelForwardEvent()
         elif delta < 0:
             self.rwi.MouseWheelBackwardEvent()
 
-    def __setEventInformation(self, x, y, ctrl, shift, key, repeat=0, keysum=None):
+    def __setEventInformation(self, positionPoint: QPointF, ctrl, shift, key, repeat=0, keysum=None):
         scale = self.__getPixelRatio()
         if self.__fbo.mirrorVertically():
             (w, h) = self.rw.GetSize()
-            y = h - y
+            y = h - positionPoint.y()
+            x = positionPoint.x()
 
         self.rwi.SetEventInformation(
             int(round(x * scale)),

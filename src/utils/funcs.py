@@ -62,8 +62,8 @@ def cloneMouseEvent(event: QMouseEvent):
 
 def cloneWheelEvent(event: QWheelEvent):
     return QWheelEvent(
-        event.posF(),
-        event.globalPosF(),
+        event.position(),
+        event.globalPosition(),
         event.pixelDelta(),
         event.angleDelta(),
         event.buttons(),
