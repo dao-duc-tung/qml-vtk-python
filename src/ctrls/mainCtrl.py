@@ -30,6 +30,7 @@ class MainCtrl(QObject):
         self.__engine.load(QUrl.fromLocalFile(f":/main.qml"))
 
         self.__fbo = getQmlObject(self.__engine, "fbo")
+        self.__fbo.createRenderer()
         self.__hp = MainHelper(self.__procEngine, self.__fbo)
 
         self.__businessModel = BusinessModel()
