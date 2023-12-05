@@ -1,12 +1,6 @@
 # Fork of [Dao Duc Tung's python-based project on QML-VTK](https://github.com/dao-duc-tung/qml-vtk-python)
 
 
-
-
-# A Python-based project on QML-VTK combination
-
-The source code is based on [Nicanor Romero Venier's project](https://github.com/nicanor-romero/QtVtk)
-
 ## Compatibility
 
 The code was tested and worked on linux:
