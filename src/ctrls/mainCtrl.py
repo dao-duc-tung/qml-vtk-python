@@ -1,3 +1,4 @@
+import logging
 import os.path
 from pathlib import Path
 
@@ -11,6 +12,7 @@ from src.graphics.engines import Fbo, ProcessingEngine
 from src.utils import getQmlObject
 
 import random
+
 
 class MainCtrl(QObject):
     sigPosXChanged = Signal(float)

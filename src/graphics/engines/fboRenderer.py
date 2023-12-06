@@ -7,13 +7,14 @@ from PySide6.QtGui import (
     QCursor,
     QMouseEvent,
     QOpenGLFunctions,
-    QWheelEvent,
+    QWheelEvent, QOpenGLContext,
 )
 from PySide6.QtOpenGL import QOpenGLFramebufferObject, QOpenGLFramebufferObjectFormat
 from PySide6.QtQuick import QQuickFramebufferObject
 from PySide6.QtWidgets import QApplication
 
 import vtk
+from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from src.graphics import engines
 from src.utils import *
 
@@ -24,11 +25,14 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
         self.commandQueue = Queue()
         self.commandQueueLock = Lock()
 
+        # self.rw = vtk.vtkQQuickVTKRenderWindow()
+
         # self.rw = vtk.vtkGenericOpenGLRenderWindow()
         # The purpose of using vtkExternalOpenGLRenderWindow is
         # to use vtkGPUVolumeRayCastMapper with vtkVolume
         self.rw = vtk.vtkExternalOpenGLRenderWindow()
         self.rwi = vtk.vtkGenericRenderWindowInteractor()
+        # self.rwi = QVTKRenderWindowInteractor()
         self.rwi.SetRenderWindow(self.rw)
         self.rw.OpenGLInitContext()
 

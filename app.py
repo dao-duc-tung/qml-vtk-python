@@ -48,7 +48,6 @@ class App(QApplication):
         self.engine = QQmlApplicationEngine()
         self.__mainCtrl = MainCtrl(self.engine)
 
-
     def setup(self):
         mainView = getQmlObject(self.engine, "MainView")
         if mainView.property("active"):
