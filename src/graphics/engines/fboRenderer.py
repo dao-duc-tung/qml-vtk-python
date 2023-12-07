@@ -25,8 +25,6 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
         self.commandQueue = Queue()
         self.commandQueueLock = Lock()
 
-        # self.rw = vtk.vtkQQuickVTKRenderWindow()
-
         # self.rw = vtk.vtkGenericOpenGLRenderWindow()
         # The purpose of using vtkExternalOpenGLRenderWindow is
         # to use vtkGPUVolumeRayCastMapper with vtkVolume
