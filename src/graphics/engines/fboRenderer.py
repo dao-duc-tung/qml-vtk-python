@@ -23,15 +23,17 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
     def __init__(self):
         super(FboRenderer, self).__init__()
         self.commandQueue = Queue()
+        print("FboRender init {}, size: {}".format(self.commandQueue, self.commandQueue.qsize()))
         self.commandQueueLock = Lock()
 
-        # self.rw = vtk.vtkGenericOpenGLRenderWindow()
+        self.rw = vtk.vtkGenericOpenGLRenderWindow()
         # The purpose of using vtkExternalOpenGLRenderWindow is
         # to use vtkGPUVolumeRayCastMapper with vtkVolume
-        self.rw = vtk.vtkExternalOpenGLRenderWindow()
+        # self.rw = vtk.vtkExternalOpenGLRenderWindow()
         self.rwi = vtk.vtkGenericRenderWindowInteractor()
         # self.rwi = QVTKRenderWindowInteractor()
         self.rwi.SetRenderWindow(self.rw)
+        self.rw.Initialize()
         self.rw.OpenGLInitContext()
 
         self.__glFunc = QOpenGLFunctions()
@@ -80,6 +82,7 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
             self.__fbo.lastWheelEvent.accept()
 
     def render(self):
+        print("render")
         if not self.__isOpenGLStateInitialized:
             self.__openGLInitState()
             self.__isOpenGLStateInitialized = True
@@ -94,9 +97,11 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
             self.__processWheelEvent(self.__lastWheelEvent)
             self.__lastWheelEvent.accept()
 
+        print("{}, size: {}".format(self.commandQueue, self.commandQueue.qsize()))
         with self.commandQueueLock:
             while not self.commandQueue.empty():
                 cmd = self.commandQueue.get()
+                # print(cmd)
                 cmd.execute()
 
         # self.__fbo.window().resetOpenGLState()

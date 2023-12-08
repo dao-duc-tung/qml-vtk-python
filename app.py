@@ -51,6 +51,7 @@ class App(QApplication):
     def setup(self):
         mainView = getQmlObject(self.engine, "MainView")
         if mainView.property("active"):
+            print("MainView active")
             self.__mainCtrl.setup()
         else:
             QTimer.singleShot(0, self.setup)
