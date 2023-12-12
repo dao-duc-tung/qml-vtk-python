@@ -38,7 +38,7 @@ def compileQml():
         qInitResources()
 
 
-class App(QGuiApplication):
+class App(QApplication):
     def __init__(self, sys_argv):
         if sys.platform == "win32":
             sys_argv += ["-style", "material"]  #! MUST HAVE
