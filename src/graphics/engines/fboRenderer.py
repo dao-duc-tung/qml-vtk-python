@@ -2,7 +2,7 @@ from queue import Queue
 from threading import Lock
 from typing import List, Optional
 
-from PySide6.QtCore import QEvent, QObject, QSize, Qt
+from PySide6.QtCore import QEvent, QObject, QSize, Qt, QThread
 from PySide6.QtGui import (
     QCursor,
     QMouseEvent,
@@ -27,6 +27,7 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
         self.commandQueueLock = Lock()
 
         self.rw = vtk.vtkGenericOpenGLRenderWindow()
+
         # The purpose of using vtkExternalOpenGLRenderWindow is
         # to use vtkGPUVolumeRayCastMapper with vtkVolume
         # self.rw = vtk.vtkExternalOpenGLRenderWindow()
@@ -41,8 +42,9 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
         # self.rw.SetForceMaximumHardwareLineWidth(1)
         # self.rw.SetOwnContext(False)
         # self.rw.Initialize()
-
-        self.rw.OpenGLInitContext()
+        # qs = QSize(400, 400)
+        # self.createFramebufferObject(qs)
+        # self.rw.OpenGLInitContext()
 
         self.__glFunc = QOpenGLFunctions()
         self.__isOpenGLStateInitialized = False
@@ -58,6 +60,7 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
         glFormat = QOpenGLFramebufferObjectFormat()
         glFormat.setAttachment(QOpenGLFramebufferObject.CombinedDepthStencil)
         self.__openGLFbo = QOpenGLFramebufferObject(size, glFormat)
+        self.rw.OpenGLInitContext()
         return self.__openGLFbo
 
     def synchronize(self, item: engines.Fbo):
