@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 
 from PySide6.QtCore import Qt, QTimer, Signal, QUrl
-from PySide6.QtGui import QSurfaceFormat
+from PySide6.QtGui import QSurfaceFormat, QGuiApplication
 from PySide6.QtQml import QQmlApplicationEngine, qmlRegisterType
 from PySide6.QtWidgets import QApplication
 import vtk
@@ -38,7 +38,7 @@ def compileQml():
         qInitResources()
 
 
-class App(QApplication):
+class App(QGuiApplication):
     def __init__(self, sys_argv):
         if sys.platform == "win32":
             sys_argv += ["-style", "material"]  #! MUST HAVE
@@ -51,6 +51,7 @@ class App(QApplication):
     def setup(self):
         mainView = getQmlObject(self.engine, "MainView")
         if mainView.property("active"):
+            print("MainView active")
             self.__mainCtrl.setup()
         else:
             QTimer.singleShot(0, self.setup)
