@@ -23,7 +23,6 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
     def __init__(self):
         super(FboRenderer, self).__init__()
         self.commandQueue = Queue()
-        print("FboRender init {}, size: {}".format(self.commandQueue, self.commandQueue.qsize()))
         self.commandQueueLock = Lock()
 
         self.rw = vtk.vtkGenericOpenGLRenderWindow()
@@ -34,17 +33,6 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
         self.rwi = vtk.vtkGenericRenderWindowInteractor()
         # self.rwi = QVTKRenderWindowInteractor()
         self.rwi.SetRenderWindow(self.rw)
-
-        # self.rw.SetReadyForRendering(True)
-        # self.rw.GetInteractor().Initialize()
-        # self.rw.SetMapped(True)
-        # self.rw.SetIsCurrent(True)
-        # self.rw.SetForceMaximumHardwareLineWidth(1)
-        # self.rw.SetOwnContext(False)
-        # self.rw.Initialize()
-        # qs = QSize(400, 400)
-        # self.createFramebufferObject(qs)
-        # self.rw.OpenGLInitContext()
 
         self.__glFunc = QOpenGLFunctions()
         self.__isOpenGLStateInitialized = False
@@ -93,7 +81,6 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
             self.__fbo.lastWheelEvent.accept()
 
     def render(self):
-        print("FboRenderer::render")
         self.rw.SetReadyForRendering(True)
         self.rw.SetIsCurrent(True)
         if not self.__isOpenGLStateInitialized:
@@ -111,7 +98,6 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
             self.__processWheelEvent(self.__lastWheelEvent)
             self.__lastWheelEvent.accept()
 
-        print("{}, size: {}".format(self.commandQueue, self.commandQueue.qsize()))
         with self.commandQueueLock:
             while not self.commandQueue.empty():
                 cmd = self.commandQueue.get()
