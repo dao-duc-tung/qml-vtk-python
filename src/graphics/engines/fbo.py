@@ -28,7 +28,10 @@ class Fbo(QQuickFramebufferObject):
         self.setAcceptedMouseButtons(Qt.AllButtons)
         self.setMirrorVertically(True)
 
+
+
     def render(self):
+        print("Fbo::render")
         self.__fboRenderer.rwi.Render()
 
     def addRenderer(self, renderer: vtk.vtkRenderer):

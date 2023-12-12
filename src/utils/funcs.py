@@ -114,7 +114,7 @@ def setDefaultSurfaceFormat(stereoCapable):
     fmt.setGreenBufferSize(8)
     fmt.setBlueBufferSize(8)
     fmt.setDepthBufferSize(8)
-    fmt.setAlphaBufferSize(8)
+    fmt.setAlphaBufferSize(0)
     fmt.setStencilBufferSize(0)
     fmt.setStereo(stereoCapable)
     fmt.setSamples(0)
