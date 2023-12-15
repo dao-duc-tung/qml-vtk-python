@@ -1,6 +1,10 @@
-from PySide2.QtCore import QObject, QUrl, Signal, Property, Slot
-from PySide2.QtQml import QQmlApplicationEngine, qmlRegisterType, QQmlEngine
-from PySide2.QtWidgets import QApplication
+import logging
+import os.path
+from pathlib import Path
+
+from PySide6.QtCore import QObject, QUrl, Signal, Property, Slot
+from PySide6.QtQml import QQmlApplicationEngine, qmlRegisterType, QQmlEngine
+from PySide6.QtWidgets import QApplication
 
 from src.ctrls import MainHelper
 from src.models import BusinessModel
@@ -18,21 +22,23 @@ class MainCtrl(QObject):
         super().__init__()
         self.__engine = engine
         self.__procEngine = ProcessingEngine()
-        self.__engine.load(QUrl.fromLocalFile(f":/main.qml"))
-
-        self.__fbo = getQmlObject(self.__engine, "fbo")
-        self.__hp = MainHelper(self.__procEngine, self.__fbo)
-
-        self.__businessModel = BusinessModel()
 
         self.__posX = 0.0
         self.__posY = 0.0
 
-    # * Public
-    def setup(self):
         ctxt = self.__engine.rootContext()
         ctxt.setContextProperty("MainCtrl", self)
 
+        self.__engine.load(QUrl.fromLocalFile(f":/main.qml"))
+
+        self.__fbo = getQmlObject(self.__engine, "fbo")
+        self.__fbo.createRenderer()
+        self.__hp = MainHelper(self.__procEngine, self.__fbo)
+
+        self.__businessModel = BusinessModel()
+
+    # * Public
+    def setup(self):
         self.__hp.addInteractorStyle()
         self.__hp.addRenderer()
         self.__hp.render()

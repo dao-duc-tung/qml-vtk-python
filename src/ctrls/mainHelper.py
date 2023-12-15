@@ -1,4 +1,4 @@
-from PySide2.QtCore import QObject, QUrl, qDebug, qCritical, QFileInfo, QThread, Signal
+from PySide6.QtCore import QObject, QUrl, qDebug, qCritical, QFileInfo, QThread, Signal
 
 from src.graphics.engines import *
 from src.graphics.vtkModels import *

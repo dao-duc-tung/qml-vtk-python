@@ -2,32 +2,33 @@ import fnmatch
 import os
 import sys
 
-from PySide2.QtCore import QEvent, QObject, QPointF, Qt
-from PySide2.QtGui import QMouseEvent, QWheelEvent, QSurfaceFormat
+from PySide6.QtCore import QEvent, QObject, QPointF, Qt
+from PySide6.QtGui import QMouseEvent, QWheelEvent, QSurfaceFormat
+
 
 if sys.platform == "win32":
     try:
         PY_EXE_PATH = os.path.dirname(sys.executable)
-        PYSIDE2_RCC = os.path.join(PY_EXE_PATH, "Scripts", "pyside2-rcc.exe")
-        assert os.path.exists(PYSIDE2_RCC)
+        PYSIDE6_RCC = os.path.join(PY_EXE_PATH, "pyside6-rcc.exe")
+        assert os.path.exists(PYSIDE6_RCC)
     except AssertionError:
-        print("PySide2 is not found! PySide2 may be installed on Anaconda!")
+        print("PySide6 is not found! PySide6 may be installed on Anaconda!")
         try:
-            import PySide2
+            import PySide6
 
             PYSIDE2_PKG_PATH = os.path.abspath(
-                os.path.join(PySide2.__file__, os.pardir)
+                os.path.join(PySide6.__file__, os.pardir)
             )
-            PYSIDE2_RCC = os.path.join(PYSIDE2_PKG_PATH, "pyside2-rcc.exe")
+            PYSIDE6_RCC = os.path.join(PYSIDE2_PKG_PATH, "pyside6-rcc.exe")
         except ImportError:
-            print("PySide2 is not installed! Please install PySide2 first.")
+            print("PySide6 is not installed! Please install PySide6 first.")
 elif sys.platform == "linux":
     try:
         PY_EXE_PATH = os.path.dirname(sys.executable)
-        PYSIDE2_RCC = os.path.join(PY_EXE_PATH, "pyside2-rcc")
-        assert os.path.exists(PYSIDE2_RCC)
+        PYSIDE6_RCC = os.path.join(PY_EXE_PATH, "pyside6-rcc")
+        assert os.path.exists(PYSIDE6_RCC)
     except AssertionError:
-        print("pyside2-rcc is not found!")
+        print("pyside6-rcc is not found!")
 else:
     raise NotImplementedError
 
@@ -43,9 +44,8 @@ def compileResourceFiles(rcDir, outDir):
                     pyFilePath = os.path.join(outDir, "rc_" + nameStr + ".py")
                 else:
                     pyFilePath = os.path.join(root, "rc_" + nameStr + ".py")
-                cmdStr = "{0} {1} -o {2}".format(PYSIDE2_RCC, rcFilePath, pyFilePath)
+                cmdStr = "{0} {1} -o {2}".format(PYSIDE6_RCC, rcFilePath, pyFilePath)
                 os.system(cmdStr)
-
 
 def cloneMouseEvent(event: QMouseEvent):
     return QMouseEvent(
@@ -62,8 +62,8 @@ def cloneMouseEvent(event: QMouseEvent):
 
 def cloneWheelEvent(event: QWheelEvent):
     return QWheelEvent(
-        event.posF(),
-        event.globalPosF(),
+        event.position(),
+        event.globalPosition(),
         event.pixelDelta(),
         event.angleDelta(),
         event.buttons(),
@@ -114,7 +114,7 @@ def setDefaultSurfaceFormat(stereoCapable):
     fmt.setGreenBufferSize(8)
     fmt.setBlueBufferSize(8)
     fmt.setDepthBufferSize(8)
-    fmt.setAlphaBufferSize(8)
+    fmt.setAlphaBufferSize(0)
     fmt.setStencilBufferSize(0)
     fmt.setStereo(stereoCapable)
     fmt.setSamples(0)

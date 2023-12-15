@@ -1,14 +1,14 @@
 from typing import List, Optional
 
-from PySide2.QtCore import (
+from PySide6.QtCore import (
     QEvent,
     QPoint,
     QPointF,
     Qt,
     Slot,
 )
-from PySide2.QtGui import QMouseEvent
-from PySide2.QtQuick import QQuickFramebufferObject
+from PySide6.QtGui import QMouseEvent, QWheelEvent
+from PySide6.QtQuick import QQuickFramebufferObject
 
 import vtk
 from src.graphics import engines

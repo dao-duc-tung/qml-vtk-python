@@ -2,19 +2,19 @@ from queue import Queue
 from threading import Lock
 from typing import List, Optional
 
-from PySide2.QtCore import QEvent, QObject, QSize, Qt
-from PySide2.QtGui import (
+from PySide6.QtCore import QEvent, QObject, QSize, Qt, QThread
+from PySide6.QtGui import (
     QCursor,
     QMouseEvent,
-    QOpenGLFramebufferObject,
-    QOpenGLFramebufferObjectFormat,
     QOpenGLFunctions,
-    QWheelEvent,
+    QWheelEvent, QOpenGLContext,
 )
-from PySide2.QtQuick import QQuickFramebufferObject
-from PySide2.QtWidgets import QApplication
+from PySide6.QtOpenGL import QOpenGLFramebufferObject, QOpenGLFramebufferObjectFormat
+from PySide6.QtQuick import QQuickFramebufferObject
+from PySide6.QtWidgets import QApplication
 
 import vtk
+from vtkmodules.qt.QVTKRenderWindowInteractor import QVTKRenderWindowInteractor
 from src.graphics import engines
 from src.utils import *
 
@@ -26,12 +26,13 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
         self.commandQueueLock = Lock()
 
         self.rw = vtk.vtkGenericOpenGLRenderWindow()
+
         # The purpose of using vtkExternalOpenGLRenderWindow is
         # to use vtkGPUVolumeRayCastMapper with vtkVolume
         # self.rw = vtk.vtkExternalOpenGLRenderWindow()
         self.rwi = vtk.vtkGenericRenderWindowInteractor()
+        # self.rwi = QVTKRenderWindowInteractor()
         self.rwi.SetRenderWindow(self.rw)
-        self.rw.OpenGLInitContext()
 
         self.__glFunc = QOpenGLFunctions()
         self.__isOpenGLStateInitialized = False
@@ -47,6 +48,7 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
         glFormat = QOpenGLFramebufferObjectFormat()
         glFormat.setAttachment(QOpenGLFramebufferObject.CombinedDepthStencil)
         self.__openGLFbo = QOpenGLFramebufferObject(size, glFormat)
+        self.rw.OpenGLInitContext()
         return self.__openGLFbo
 
     def synchronize(self, item: engines.Fbo):
@@ -79,7 +81,10 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
             self.__fbo.lastWheelEvent.accept()
 
     def render(self):
+        self.rw.SetReadyForRendering(True)
+        self.rw.SetIsCurrent(True)
         if not self.__isOpenGLStateInitialized:
+
             self.__openGLInitState()
             self.__isOpenGLStateInitialized = True
 
@@ -96,9 +101,10 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
         with self.commandQueueLock:
             while not self.commandQueue.empty():
                 cmd = self.commandQueue.get()
+                # print(cmd)
                 cmd.execute()
 
-        self.__fbo.window().resetOpenGLState()
+        # self.__fbo.window().resetOpenGLState()
 
     def __openGLInitState(self):
         self.rw.OpenGLInitState()
@@ -112,9 +118,7 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
         if event.type() == QEvent.MouseButtonDblClick:
             repeat = 1
 
-        self.__setEventInformation(
-            event.x(), event.y(), ctrl, shift, chr(0), repeat, None
-        )
+        self.__setEventInformation(event.position(), ctrl, shift, chr(0), repeat, None)
         if (
             event.type() == QEvent.MouseButtonPress
             or event.type() == QEvent.MouseButtonDblClick
@@ -135,24 +139,25 @@ class FboRenderer(QQuickFramebufferObject.Renderer, QObject):
 
     def __processMouseMoveEvent(self, event: QMouseEvent):
         ctrl, shift = self.__getCtrlShift(event)
-        self.__setEventInformation(event.x(), event.y(), ctrl, shift, chr(0), 0, None)
+        self.__setEventInformation(event.position(), ctrl, shift, chr(0), 0, None)
         self.rwi.MouseMoveEvent()
 
     def __processWheelEvent(self, event: QWheelEvent):
         ctrl, shift = self.__getCtrlShift(event)
-        self.__setEventInformation(event.x(), event.y(), ctrl, shift, chr(0), 0, None)
+        self.__setEventInformation(event.position(), ctrl, shift, chr(0), 0, None)
 
-        delta = event.delta()
+        delta = event.angleDelta().y()
         if delta > 0:
             self.rwi.MouseWheelForwardEvent()
         elif delta < 0:
             self.rwi.MouseWheelBackwardEvent()
 
-    def __setEventInformation(self, x, y, ctrl, shift, key, repeat=0, keysum=None):
+    def __setEventInformation(self, positionPoint: QPointF, ctrl, shift, key, repeat=0, keysum=None):
         scale = self.__getPixelRatio()
         if self.__fbo.mirrorVertically():
             (w, h) = self.rw.GetSize()
-            y = h - y
+            y = h - positionPoint.y()
+            x = positionPoint.x()
 
         self.rwi.SetEventInformation(
             int(round(x * scale)),
