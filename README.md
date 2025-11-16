@@ -1,4 +1,6 @@
-# A Python-based project on QML-VTK combination
+# A Python-based project on QML-VTK combination (Archived)
+
+This repository is no longer actively maintained and has been archived.
 
 The source code is based on [Nicanor Romero Venier's project](https://github.com/nicanor-romero/QtVtk)
 
